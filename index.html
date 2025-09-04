@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>SWIL</title>
 <style>
+/* Your existing CSS styles */
 * { margin:0; padding:0; box-sizing:border-box; }
 body {
   font-family: Arial, sans-serif;
@@ -15,45 +16,36 @@ body {
   overflow-x: hidden;
   position: relative;
 }
-/* Overlays */
+/* Overlays and other styles */
 #body-overlay {
-  position: fixed;
-  top: 0; left: 0;
-  width: 100%; height: 100%;
+  position: fixed; top: 0; left: 0; width: 100%; height: 100%;
   background: url('https://64.media.tumblr.com/8871518c1f104c9cede189ba8a041913/tumblr_n02trm8qkq1svwlszo1_r1_500.gif') no-repeat center center;
   background-size: cover;
   pointer-events: none;
   z-index: 0;
 }
 #top-banner {
-  position: fixed;
-  top: 0; left: 50%;
-  transform: translateX(-50%);
-  width: 100%;
-  max-width: 600px;
-  z-index: 1;
+  position: fixed; top: 0; left: 50%; transform: translateX(-50%);
+  width: 100%; max-width: 600px; z-index: 1;
 }
 h1, h2 { position: relative; z-index: 2; }
 h1 { text-align: center; font-size: 5em; color: black; -webkit-text-stroke: 2px red; margin-top: 150px; }
 h2 { text-align: center; font-size: 1.2em; margin-bottom: 50px; color: black; -webkit-text-stroke: 1px red; }
-/* Existing repeating small side GIFs */
 #side-left, #side-right {
   position: fixed; top:0; width: 80px; height: 100%;
   background: url('https://media4.giphy.com/media/10a8AOSeP6Rqfu/200w.gif?cid=790b7611r9wo0kx37gdmv13xww5xkm93hlxjf1ez816nybk6&ep=v1_gifs_search&rid=200w.gif&ct=s') repeat-y;
   background-size: 80px auto; z-index: 2;
 }
 #side-left { left:0; } #side-right { right:0; }
-/* New smaller side GIFs */
 #big-left, #big-right {
   position: fixed; top: 0; width: 100px; height: 100%;
   background: url('https://64.media.tumblr.com/a33b974be0ceb710cad1e2d90852ea7f/6fefe7acdbd459ca-79/s250x400/67d4aca6996622af3a2998bb085fe2982567a931.gif') no-repeat center center;
   background-size: contain; z-index: 1;
 }
-#big-left { left: 90px; } /* offset to avoid small GIF */
+#big-left { left: 90px; }
 #big-right { right: 90px; }
 #corner-dog { position: fixed; bottom: 20px; left: 20px; width: 80px; z-index: 10; }
 #bottom-gif { position: fixed; bottom: 0; right: 50%; transform: translateX(50%); width: 150px; z-index: 5; }
-#flying-gif { position: absolute; pointer-events: none; z-index: 9999; }
 #login-section, #post-section {
   width: 80%; max-width: 800px; margin: auto;
   background: rgba(255,255,255,0.8); padding: 20px; border-radius: 10px;
@@ -64,10 +56,9 @@ h2 { text-align: center; font-size: 1.2em; margin-bottom: 50px; color: black; -w
 .post small { display: block; font-size: 0.8em; color: gray; margin-top: 5px; }
 input, textarea, select { width: 100%; margin: 5px 0; padding: 5px; }
 button { padding: 5px 10px; margin-top: 5px; cursor: pointer; }
-/* Music player */
+#password-div { margin-top: 10px; }
 #music-player {
-  position: fixed;
-  bottom: 20px; right: 20px;
+  position: fixed; bottom: 20px; right: 20px;
   background: rgba(255,255,255,0.9);
   padding: 10px;
   border-radius: 8px;
@@ -90,7 +81,7 @@ button { padding: 5px 10px; margin-top: 5px; cursor: pointer; }
 <h2>Sharing - What - I - Like</h2>
 <div id="login-section">
   <label>Select Role:</label>
-  <select id="role-select">
+  <select id="role-select" onchange="togglePasswordField()">
     <option value="guest">Guest</option>
     <option value="admin">Admin</option>
   </select>
@@ -117,52 +108,61 @@ button { padding: 5px 10px; margin-top: 5px; cursor: pointer; }
 <script>
 let role = "guest";
 
-// Utility: get formatted date/time string
+// Show or hide password field on role selection
+function togglePasswordField() {
+  const selectedRole = document.getElementById('role-select').value;
+  const passwordDiv = document.getElementById('password-div');
+  passwordDiv.style.display = selectedRole === 'admin' ? 'block' : 'none';
+}
+
+// Utility to get formatted date/time string
 function getFormattedTime() {
   return new Date().toLocaleString();
 }
 
-// Login
+// Login process
 function login() {
   const selectedRole = document.getElementById('role-select').value;
-  const passwordDiv = document.getElementById('password-div');
   const password = document.getElementById('admin-password').value;
+  const postSection = document.getElementById('post-section');
+
   if (selectedRole === 'admin') {
-    passwordDiv.style.display = 'block';
     if (password === 'didifuckingstutter') {
       role = 'admin';
       alert('Logged in as admin!');
-      document.getElementById('post-section').style.display = 'block';
+      postSection.style.display = 'block'; // show posting area
     } else {
-      role = 'guest';
       alert('Wrong password! Logged in as guest.');
-      document.getElementById('post-section').style.display = 'none';
+      role = 'guest';
+      postSection.style.display = 'none'; // hide posting area
     }
   } else {
-    passwordDiv.style.display = 'none';
     role = 'guest';
     alert('Logged in as guest.');
-    document.getElementById('post-section').style.display = 'none';
+    postSection.style.display = 'none';
   }
+
   loadPosts();
 }
 
-// Save posts to localStorage
+// Save posts and comments to localStorage
 function savePosts() {
-  const posts = document.getElementById('posts').innerHTML;
-  localStorage.setItem('posts', posts);
+  const postsContent = document.getElementById('posts').innerHTML;
+  localStorage.setItem('posts', postsContent);
 }
 
-// Load posts from localStorage and bind comment buttons
+// Load posts and comments from localStorage and bind comment buttons
 function loadPosts() {
   const saved = localStorage.getItem('posts');
   if (saved) {
     document.getElementById('posts').innerHTML = saved;
     bindCommentButtons();
+  } else {
+    document.getElementById('posts').innerHTML = '';
   }
 }
 
-// Bind all comment buttons to addComment
+// Bind comment buttons to the addComment function
 function bindCommentButtons() {
   const buttons = document.querySelectorAll('#posts button');
   buttons.forEach(btn => {
@@ -172,13 +172,12 @@ function bindCommentButtons() {
   });
 }
 
-// Create a new post (admin only)
+// Create a post (admin only)
 function createPost() {
   if (role !== 'admin') return;
   const text = document.getElementById('post-text').value.trim();
-  if (text === '') return;
+  if (!text) return;
   const files = document.getElementById('post-file').files;
-
   const postDiv = document.createElement('div');
   postDiv.className = 'post';
   postDiv.innerHTML = `<p>${text}</p><small>Posted at: ${getFormattedTime()}</small>`;
@@ -187,16 +186,16 @@ function createPost() {
     const file = files[i];
     const reader = new FileReader();
     reader.onload = function(e) {
-      if (file.type.startsWith("image/") || file.type === "image/gif") {
+      if (file.type.startsWith('image/') || file.type === 'image/gif') {
         const img = document.createElement('img');
         img.src = e.target.result;
-        img.style.maxWidth = "100%";
+        img.style.maxWidth = '100%';
         postDiv.appendChild(img);
-      } else if (file.type.startsWith("video/")) {
+      } else if (file.type.startsWith('video/')) {
         const vid = document.createElement('video');
         vid.src = e.target.result;
         vid.controls = true;
-        vid.style.maxWidth = "100%";
+        vid.style.maxWidth = '100%';
         postDiv.appendChild(vid);
       }
       savePosts();
@@ -205,20 +204,23 @@ function createPost() {
   }
 
   const commentDiv = document.createElement('div');
-  commentDiv.innerHTML = `<textarea placeholder="Add comment"></textarea>
-                          <button>Comment</button>`;
+  commentDiv.innerHTML = `
+    <textarea placeholder="Add comment"></textarea>
+    <button>Comment</button>
+  `;
   postDiv.appendChild(commentDiv);
   document.getElementById('posts').prepend(postDiv);
+
   document.getElementById('post-text').value = '';
   document.getElementById('post-file').value = '';
   savePosts();
   bindCommentButtons();
 }
 
-// Add comment (anyone can comment)
+// Add comment (guests and admins)
 function addComment(btn) {
   const commentText = btn.previousElementSibling.value.trim();
-  if (commentText === '') return;
+  if (!commentText) return;
   const commentDiv = document.createElement('div');
   commentDiv.className = 'comment';
   commentDiv.innerText = commentText;
@@ -232,7 +234,7 @@ function createFlyingGif() {
   const gif = document.createElement('img');
   gif.src = 'https://64.media.tumblr.com/01a1afe754400f6254b6650e20b33ef4/tumblr_pgh03shQpu1wchb2mo10_r1_250.gif';
   gif.style.position = 'absolute';
-  gif.style.width = '100px'; // bigger
+  gif.style.width = '100px';
   gif.style.left = Math.random() * (window.innerWidth - 100) + 'px';
   gif.style.top = Math.random() * (window.innerHeight - 100) + 'px';
   document.body.appendChild(gif);
@@ -240,34 +242,30 @@ function createFlyingGif() {
 }
 setInterval(createFlyingGif, 2000);
 
-// Fart sound on click
+// Sounds and music player (unchanged)
 document.addEventListener('click', () => {
   document.getElementById('fart-sound').play();
 });
-
-// Dog bark every 30 minutes
 setInterval(() => {
   document.getElementById('dog-bark').play();
 }, 1800000);
-
-// Music player
 function playMusic() {
   const url = document.getElementById('music-url').value;
   const container = document.getElementById('music-container');
   container.innerHTML = `<iframe width="230" height="80" src="https://www.youtube.com/embed/${getYouTubeID(url)}?autoplay=1" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>`;
 }
-
-// Extract YouTube ID
 function getYouTubeID(url) {
   const reg = /(?:youtube\.com\/.*v=|youtu\.be\/)([^&]+)/;
   const match = url.match(reg);
   return match ? match[1] : '';
 }
 
-// Load posts on page load
+// On page load show login section and posts only (hide post creation)
 window.onload = () => {
   document.getElementById('post-section').style.display = 'none';
   document.getElementById('password-div').style.display = 'none';
+  document.getElementById('post-text').value = '';
+  document.getElementById('admin-password').value = '';
   loadPosts();
 };
 </script>
