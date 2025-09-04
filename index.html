@@ -79,13 +79,13 @@ button { padding: 5px 10px; margin-top: 5px; cursor: pointer; }
 </head>
 <body>
 <div id="body-overlay"></div>
-<img id="top-banner" src="https://media.tenor.com/lu7ZRQm96x0AAAAi/heart-banner-kawaii.gif">
+<img id="top-banner" src="https://media.tenor.com/lu7ZRQm96x0AAAAi/heart-banner-kawaii.gif" />
 <div id="side-left"></div>
 <div id="side-right"></div>
 <div id="big-left"></div>
 <div id="big-right"></div>
-<img id="corner-dog" src="https://i.gzn.jp/img/2022/02/22/fastest-gif-animation/dancing-dog-2.gif">
-<img id="bottom-gif" src="https://platform.vox.com/wp-content/uploads/sites/2/chorus/uploads/chorus_asset/file/8688491/hiE5vMs.gif?quality=90&strip=all&crop=0,0,100,100">
+<img id="corner-dog" src="https://i.gzn.jp/img/2022/02/22/fastest-gif-animation/dancing-dog-2.gif" />
+<img id="bottom-gif" src="https://platform.vox.com/wp-content/uploads/sites/2/chorus/uploads/chorus_asset/file/8688491/hiE5vMs.gif?quality=90&strip=all&crop=0,0,100,100" />
 <h1>SWIL</h1>
 <h2>Sharing - What - I - Like</h2>
 <div id="login-section">
@@ -95,20 +95,20 @@ button { padding: 5px 10px; margin-top: 5px; cursor: pointer; }
     <option value="admin">Admin</option>
   </select>
   <div id="password-div" style="display:none;">
-    <input type="password" id="admin-password" placeholder="Enter admin password">
+    <input type="password" id="admin-password" placeholder="Enter admin password" />
   </div>
   <button onclick="login()">Login</button>
 </div>
 <div id="post-section" style="display:none;">
   <h3>Create a Post</h3>
   <textarea id="post-text" placeholder="Text"></textarea>
-  <input type="file" id="post-file" accept="image/*,video/*,gif" multiple>
+  <input type="file" id="post-file" accept="image/*,video/*,gif" multiple />
   <button onclick="createPost()">Post</button>
 </div>
 <div id="posts"></div>
 <!-- Music Player -->
 <div id="music-player">
-  <input type="text" id="music-url" placeholder="YouTube URL">
+  <input type="text" id="music-url" placeholder="YouTube URL" />
   <button onclick="playMusic()">Play</button>
   <div id="music-container"></div>
 </div>
@@ -117,7 +117,7 @@ button { padding: 5px 10px; margin-top: 5px; cursor: pointer; }
 <script>
 let role = "guest";
 
-// Utility: formatted current date/time string
+// Utility: get formatted date/time string
 function getFormattedTime() {
   return new Date().toLocaleString();
 }
@@ -127,9 +127,9 @@ function login() {
   const selectedRole = document.getElementById('role-select').value;
   const passwordDiv = document.getElementById('password-div');
   const password = document.getElementById('admin-password').value;
-  if(selectedRole === 'admin') {
+  if (selectedRole === 'admin') {
     passwordDiv.style.display = 'block';
-    if(password === 'didifuckingstutter') {
+    if (password === 'didifuckingstutter') {
       role = 'admin';
       alert('Logged in as admin!');
       document.getElementById('post-section').style.display = 'block';
@@ -147,88 +147,82 @@ function login() {
   loadPosts();
 }
 
-// Save posts HTML content to localStorage
+// Save posts to localStorage
 function savePosts() {
-  const postsContent = document.getElementById('posts').innerHTML;
-  localStorage.setItem('posts', postsContent);
+  const posts = document.getElementById('posts').innerHTML;
+  localStorage.setItem('posts', posts);
 }
 
-// Load posts HTML from localStorage and re-bind comment event handlers
+// Load posts from localStorage and bind comment buttons
 function loadPosts() {
-  const savedPosts = localStorage.getItem('posts');
-  if(savedPosts) {
-    document.getElementById('posts').innerHTML = savedPosts;
-    // Rebind comment buttons since dynamic elements lost handlers on page load
-    const commentButtons = document.getElementById('posts').querySelectorAll('button');
-    commentButtons.forEach(btn => {
-      btn.onclick = function() {
-        addComment(this);
-      };
-    });
+  const saved = localStorage.getItem('posts');
+  if (saved) {
+    document.getElementById('posts').innerHTML = saved;
+    bindCommentButtons();
   }
 }
 
-// Create a post (admins only)
+// Bind all comment buttons to addComment
+function bindCommentButtons() {
+  const buttons = document.querySelectorAll('#posts button');
+  buttons.forEach(btn => {
+    btn.onclick = function() {
+      addComment(this);
+    };
+  });
+}
+
+// Create a new post (admin only)
 function createPost() {
-  if(role !== 'admin') return;
-
+  if (role !== 'admin') return;
   const text = document.getElementById('post-text').value.trim();
-  if(text === '') return; // empty posts not allowed
-
+  if (text === '') return;
   const files = document.getElementById('post-file').files;
-  
+
   const postDiv = document.createElement('div');
   postDiv.className = 'post';
-  
-  // Add post text and timestamp
   postDiv.innerHTML = `<p>${text}</p><small>Posted at: ${getFormattedTime()}</small>`;
 
-  // Add images/videos asynchronously
-  for(let i=0; i < files.length; i++) {
+  for (let i = 0; i < files.length; i++) {
     const file = files[i];
     const reader = new FileReader();
     reader.onload = function(e) {
-      if(file.type.startsWith("image/") || file.type === "image/gif") {
+      if (file.type.startsWith("image/") || file.type === "image/gif") {
         const img = document.createElement('img');
         img.src = e.target.result;
         img.style.maxWidth = "100%";
         postDiv.appendChild(img);
-      } else if(file.type.startsWith("video/")) {
+      } else if (file.type.startsWith("video/")) {
         const vid = document.createElement('video');
         vid.src = e.target.result;
         vid.controls = true;
         vid.style.maxWidth = "100%";
         postDiv.appendChild(vid);
       }
-      savePosts(); // Save after media file loaded
+      savePosts();
     };
     reader.readAsDataURL(file);
   }
 
-  // Add comment input and button
   const commentDiv = document.createElement('div');
   commentDiv.innerHTML = `<textarea placeholder="Add comment"></textarea>
-                          <button onclick="addComment(this)">Comment</button>`;
+                          <button>Comment</button>`;
   postDiv.appendChild(commentDiv);
-
   document.getElementById('posts').prepend(postDiv);
-
-  // Clear inputs
   document.getElementById('post-text').value = '';
   document.getElementById('post-file').value = '';
-
   savePosts();
+  bindCommentButtons();
 }
 
-// Add a comment under post (guests and admin)
+// Add comment (anyone can comment)
 function addComment(btn) {
-  // Allow everyone, no role check here
   const commentText = btn.previousElementSibling.value.trim();
-  if(commentText === '') return;
+  if (commentText === '') return;
   const commentDiv = document.createElement('div');
   commentDiv.className = 'comment';
   commentDiv.innerText = commentText;
-  btn.parentElement.parentElement.appendChild(commentDiv);
+  btn.parentElement.parentElement.insertBefore(commentDiv, btn.parentElement);
   btn.previousElementSibling.value = '';
   savePosts();
 }
@@ -260,9 +254,7 @@ setInterval(() => {
 function playMusic() {
   const url = document.getElementById('music-url').value;
   const container = document.getElementById('music-container');
-  container.innerHTML = `<iframe width="230" height="80"
-    src="https://www.youtube.com/embed/${getYouTubeID(url)}?autoplay=1"
-    frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>`;
+  container.innerHTML = `<iframe width="230" height="80" src="https://www.youtube.com/embed/${getYouTubeID(url)}?autoplay=1" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>`;
 }
 
 // Extract YouTube ID
@@ -272,9 +264,8 @@ function getYouTubeID(url) {
   return match ? match[1] : '';
 }
 
-// Load posts from localStorage on page load to restore persisted content
-window.onload = function() {
-  // Initialize UI and load posts
+// Load posts on page load
+window.onload = () => {
   document.getElementById('post-section').style.display = 'none';
   document.getElementById('password-div').style.display = 'none';
   loadPosts();
@@ -282,4 +273,3 @@ window.onload = function() {
 </script>
 </body>
 </html>
-
