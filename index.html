@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>SWIL</title>
 <style>
-/* Your existing CSS styles */
+/* Your existing CSS */
 * { margin:0; padding:0; box-sizing:border-box; }
 body {
   font-family: Arial, sans-serif;
@@ -16,7 +16,6 @@ body {
   overflow-x: hidden;
   position: relative;
 }
-/* Overlays and other styles */
 #body-overlay {
   position: fixed; top: 0; left: 0; width: 100%; height: 100%;
   background: url('https://64.media.tumblr.com/8871518c1f104c9cede189ba8a041913/tumblr_n02trm8qkq1svwlszo1_r1_500.gif') no-repeat center center;
@@ -54,9 +53,15 @@ h2 { text-align: center; font-size: 1.2em; margin-bottom: 50px; color: black; -w
 #posts { margin: 20px auto; width: 80%; max-width: 800px; position: relative; z-index:2; }
 .post, .comment { background: rgba(255,255,255,0.9); margin: 10px 0; padding: 10px; border-radius: 8px; }
 .post small { display: block; font-size: 0.8em; color: gray; margin-top: 5px; }
+.comment.admin-header {
+  font-weight: bold; color: red; margin-bottom: 5px;
+}
+.comment > div {
+  margin-top: 5px;
+}
 input, textarea, select { width: 100%; margin: 5px 0; padding: 5px; }
 button { padding: 5px 10px; margin-top: 5px; cursor: pointer; }
-#password-div { margin-top: 10px; }
+#password-div { margin-top: 10px;}
 #music-player {
   position: fixed; bottom: 20px; right: 20px;
   background: rgba(255,255,255,0.9);
@@ -108,19 +113,19 @@ button { padding: 5px 10px; margin-top: 5px; cursor: pointer; }
 <script>
 let role = "guest";
 
-// Show or hide password field on role selection
+// Show/hide password input based on role selection
 function togglePasswordField() {
   const selectedRole = document.getElementById('role-select').value;
   const passwordDiv = document.getElementById('password-div');
   passwordDiv.style.display = selectedRole === 'admin' ? 'block' : 'none';
 }
 
-// Utility to get formatted date/time string
+// Get formatted datetime string
 function getFormattedTime() {
   return new Date().toLocaleString();
 }
 
-// Login process
+// Login handler
 function login() {
   const selectedRole = document.getElementById('role-select').value;
   const password = document.getElementById('admin-password').value;
@@ -130,16 +135,16 @@ function login() {
     if (password === 'didifuckingstutter') {
       role = 'admin';
       alert('Logged in as admin!');
-      postSection.style.display = 'block'; // show posting area
+      postSection.style.display = 'block'; // admin can post
     } else {
       alert('Wrong password! Logged in as guest.');
       role = 'guest';
-      postSection.style.display = 'none'; // hide posting area
+      postSection.style.display = 'none'; // guests cannot post
     }
   } else {
     role = 'guest';
     alert('Logged in as guest.');
-    postSection.style.display = 'none';
+    postSection.style.display = 'none'; // guests cannot post
   }
 
   loadPosts();
@@ -151,7 +156,7 @@ function savePosts() {
   localStorage.setItem('posts', postsContent);
 }
 
-// Load posts and comments from localStorage and bind comment buttons
+// Load posts and restore comment button handlers
 function loadPosts() {
   const saved = localStorage.getItem('posts');
   if (saved) {
@@ -162,7 +167,7 @@ function loadPosts() {
   }
 }
 
-// Bind comment buttons to the addComment function
+// Attach comment handlers to buttons
 function bindCommentButtons() {
   const buttons = document.querySelectorAll('#posts button');
   buttons.forEach(btn => {
@@ -172,7 +177,7 @@ function bindCommentButtons() {
   });
 }
 
-// Create a post (admin only)
+// Create post (admin only)
 function createPost() {
   if (role !== 'admin') return;
   const text = document.getElementById('post-text').value.trim();
@@ -210,20 +215,32 @@ function createPost() {
   `;
   postDiv.appendChild(commentDiv);
   document.getElementById('posts').prepend(postDiv);
-
   document.getElementById('post-text').value = '';
   document.getElementById('post-file').value = '';
   savePosts();
   bindCommentButtons();
 }
 
-// Add comment (guests and admins)
+// Add comment, show "Admin" header if commenter is admin
 function addComment(btn) {
   const commentText = btn.previousElementSibling.value.trim();
   if (!commentText) return;
+
   const commentDiv = document.createElement('div');
   commentDiv.className = 'comment';
-  commentDiv.innerText = commentText;
+
+  // If admin is commenting, add header label
+  if (role === 'admin') {
+    const header = document.createElement('div');
+    header.className = 'admin-header';
+    header.innerText = 'Admin';
+    commentDiv.appendChild(header);
+  }
+
+  const textNode = document.createElement('div');
+  textNode.innerText = commentText;
+  commentDiv.appendChild(textNode);
+
   btn.parentElement.parentElement.insertBefore(commentDiv, btn.parentElement);
   btn.previousElementSibling.value = '';
   savePosts();
@@ -242,7 +259,7 @@ function createFlyingGif() {
 }
 setInterval(createFlyingGif, 2000);
 
-// Sounds and music player (unchanged)
+// Sounds and music player
 document.addEventListener('click', () => {
   document.getElementById('fart-sound').play();
 });
@@ -260,7 +277,7 @@ function getYouTubeID(url) {
   return match ? match[1] : '';
 }
 
-// On page load show login section and posts only (hide post creation)
+// On page load: hide post section, hide password box, reset inputs, and load posts
 window.onload = () => {
   document.getElementById('post-section').style.display = 'none';
   document.getElementById('password-div').style.display = 'none';
