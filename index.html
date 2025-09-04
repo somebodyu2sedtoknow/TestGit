@@ -197,15 +197,13 @@ function createPost() {
 
 // Add comment
 function addComment(btn) {
-  if(role === 'guest' || role === 'admin') {
-    const commentText = btn.previousElementSibling.value;
-    if(commentText.trim() === '') return;
-    const commentDiv = document.createElement('div');
-    commentDiv.className = 'comment';
-    commentDiv.innerText = commentText;
-    btn.parentElement.parentElement.appendChild(commentDiv);
-    btn.previousElementSibling.value = '';
-  }
+  const commentText = btn.previousElementSibling.value;
+  if(commentText.trim() === '') return;
+  const commentDiv = document.createElement('div');
+  commentDiv.className = 'comment';
+  commentDiv.innerText = commentText;
+  btn.parentElement.parentElement.appendChild(commentDiv);
+  btn.previousElementSibling.value = '';
 }
 
 // Flying GIFs bigger
@@ -248,3 +246,4 @@ function getYouTubeID(url) {
 
 </body>
 </html>
+
