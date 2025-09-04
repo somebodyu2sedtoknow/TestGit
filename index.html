@@ -222,24 +222,14 @@ function createPost() {
 
 // Add a comment under post (guests and admin)
 function addComment(btn) {
-  if(role !== 'guest' && role !== 'admin') {
-    alert('You must log in to comment.');
-    return;
-  }
+  // Allow everyone, no role check here
   const commentText = btn.previousElementSibling.value.trim();
   if(commentText === '') return;
-
-  // Create comment div
   const commentDiv = document.createElement('div');
   commentDiv.className = 'comment';
   commentDiv.innerText = commentText;
-
-  // Append comment before comment input area
-  btn.parentElement.parentElement.insertBefore(commentDiv, btn.parentElement);
-
-  // Clear comment textarea
+  btn.parentElement.parentElement.appendChild(commentDiv);
   btn.previousElementSibling.value = '';
-
   savePosts();
 }
 
@@ -292,3 +282,4 @@ window.onload = function() {
 </script>
 </body>
 </html>
+
