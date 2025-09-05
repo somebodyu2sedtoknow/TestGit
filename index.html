@@ -128,32 +128,16 @@ function logDebug(msg, isError=false){
 }
 
 try {
-  // ✅ Initialize Firebase
   firebase.initializeApp(firebaseConfig);
   console.log("Firebase initialized ✅");
-
-  // ✅ Test DB read
-  const dbTest = firebase.database().ref("posts");
-  dbTest.get().then((snapshot) => {
-    if (snapshot.exists()) {
-      console.log("✅ Posts from DB:", snapshot.val());
-    } else {
-      console.log("⚠️ No data available in posts");
-    }
-  }).catch((error) => {
-    console.error("❌ DB read error:", error);
-  });
-
 } catch(e){
   logDebug('Firebase init failed: ' + (e.message||e), true);
 }
 
-// main DB + storage handles
 const db = firebase.database();
 const storage = firebase.storage();
 let role = 'guest';
 
-/* expose toggle so select onchange works */
 window.togglePasswordField = function(){
   try {
     const sel = document.getElementById('role-select').value;
@@ -161,7 +145,6 @@ window.togglePasswordField = function(){
   } catch(e){ logDebug('toggle error: '+e.message, true); }
 };
 
-/* login */
 window.login = function(){
   try {
     const sel = document.getElementById('role-select').value;
@@ -181,12 +164,10 @@ window.login = function(){
   } catch(e){ logDebug('login error: '+(e.message||e), true); alert('Login error — open debug box'); }
 };
 
-/* helper: unique filename */
 function uniqueName(name){
   return Date.now() + '_' + Math.random().toString(36).slice(2,9) + '_' + name.replace(/\s+/g,'_');
 }
 
-/* upload array of files -> returns Promise(array of URLs) */
 function uploadFiles(files){
   if(!files || files.length === 0) return Promise.resolve([]);
   const arr = Array.from(files);
@@ -198,7 +179,6 @@ function uploadFiles(files){
   return Promise.all(promises);
 }
 
-/* create post (admin only, now with image URL instead of upload) */
 window.createPost = function () {
   try {
     if (role !== 'admin') {
@@ -214,7 +194,6 @@ window.createPost = function () {
       return;
     }
 
-    const db = firebase.database();
     const postsRef = db.ref('posts');
     const newRef = postsRef.push();
 
@@ -222,71 +201,19 @@ window.createPost = function () {
       text: text,
       img: imgUrl || null,
       role: role,
-      time: new Date().toLocaleString()
+      timestamp: new Date().toLocaleString()
     });
 
-    // clear inputs
     document.getElementById('post-text').value = "";
     document.getElementById('post-img').value = "";
 
     alert("✅ Post created!");
   } catch (e) {
-    console.error("❌ createPost error:", e);
-    alert("Failed to create post — check console");
+    logDebug('createPost error: ' + (e.message||e), true);
+    alert("Failed to create post — check debug box");
   }
 };
 
-// function to display posts
-function displayPosts() {
-  const postsRef = firebase.database().ref('posts');
-  const container = document.getElementById('posts-container');
-  container.innerHTML = '';
-
-  postsRef.on('value', (snapshot) => {
-    container.innerHTML = '';
-    snapshot.forEach((childSnap) => {
-      const post = childSnap.val();
-
-      const postEl = document.createElement('div');
-      postEl.className = 'post';
-
-      // Add text
-      if (post.text) {
-        const p = document.createElement('p');
-        p.textContent = post.text;
-        postEl.appendChild(p);
-      }
-
-      // Add image if URL exists
-      if (post.img) {
-        const img = document.createElement('img');
-        img.src = post.img; // the URL from your input
-        img.style.maxWidth = '100%';
-        img.alt = 'Post image';
-        postEl.appendChild(img);
-      }
-
-      // Add time
-      const time = document.createElement('small');
-      time.textContent = post.time;
-      postEl.appendChild(time);
-
-      container.appendChild(postEl);
-    });
-  });
-}
-
-// call it once to load posts
-displayPosts();
-
-    alert('Post created ✅');
-  } catch(err){
-    logDebug('createPost error: ' + (err && err.message ? err.message : err), true);
-    alert('Failed to create post — check debug box.');
-  }
-};
-
-/* add comment helper */
 function addComment(postId, text){
   if(!text) return;
   const cRef = db.ref('posts/' + postId + '/comments').push();
@@ -294,33 +221,28 @@ function addComment(postId, text){
     .catch(e => { logDebug('addComment error: '+(e.message||e), true); });
 }
 
-/* escape text for safety */
 function esc(s){ return (s===null||s===undefined) ? '' : String(s); }
 
-/* render posts & comments live */
 function startListening() {
-  const db = firebase.database();
   const postsRef = db.ref('posts');
+  const postsDiv = document.getElementById('posts');
 
   postsRef.on('value', function(snapshot) {
-    const posts = snapshot.val();
-    const postsDiv = document.getElementById('posts');
+    const posts = snapshot.val() || {};
     postsDiv.innerHTML = "";
 
-    for (let id in posts) {
-      const p = posts[id];
+    Object.keys(posts).forEach(postId => {
+      const p = posts[postId];
       const postDiv = document.createElement('div');
       postDiv.classList.add("post");
 
-      // Add post text
-      if (p.text) {
+      if(p.text){
         const text = document.createElement('p');
         text.innerText = p.text;
         postDiv.appendChild(text);
       }
 
-      // Add post image if exists
-      if (p.img) {
+      if(p.img){
         const img = document.createElement('img');
         img.src = p.img;
         img.style.maxWidth = "300px";
@@ -329,70 +251,62 @@ function startListening() {
         postDiv.appendChild(img);
       }
 
-      // Add post video if exists
-      if (p.video) {
-        const video = document.createElement('video');
-        video.src = p.video;
-        video.controls = true;
-        video.style.maxWidth = "300px";
-        video.style.display = "block";
-        video.style.marginTop = "8px";
-        postDiv.appendChild(video);
-      }
+      const small = document.createElement('small'); 
+      small.textContent = 'Posted at: ' + esc(p.timestamp || '');
+      postDiv.appendChild(small);
+
+      // comments container
+      const commentsDiv = document.createElement('div'); 
+      commentsDiv.className = 'comments'; 
+      commentsDiv.style.marginTop='8px';
+      postDiv.appendChild(commentsDiv);
+
+      // comment UI
+      const ta = document.createElement('textarea'); 
+      ta.placeholder = 'Add a comment'; 
+      ta.style.marginTop='8px';
+      postDiv.appendChild(ta);
+
+      const cBtn = document.createElement('div'); 
+      cBtn.style.marginTop='6px';
+      const btn = document.createElement('button'); 
+      btn.textContent = 'Comment';
+      cBtn.appendChild(btn);
+      postDiv.appendChild(cBtn);
+
+      btn.addEventListener('click', () => {
+        const txt = (ta.value || '').trim();
+        if(!txt){ alert('Comment cannot be empty'); return; }
+        addComment(postId, txt);
+        ta.value = '';
+      });
+
+      const comRef = db.ref('posts/' + postId + '/comments');
+      comRef.on('value', snap => {
+        commentsDiv.innerHTML = '';
+        const cs = snap.val();
+        if(!cs) return;
+        Object.keys(cs).forEach(cid => {
+          const c = cs[cid];
+          const cDiv = document.createElement('div'); 
+          cDiv.className = 'comment';
+          if(c.role === 'admin'){
+            const header = document.createElement('div'); 
+            header.className = 'admin-header'; 
+            header.innerText = 'Admin'; 
+            cDiv.appendChild(header);
+          }
+          const textNode = document.createElement('div'); 
+          textNode.innerText = esc(c.text || '');
+          cDiv.appendChild(textNode);
+          commentsDiv.appendChild(cDiv);
+        });
+      }, err => {
+        logDebug('Comment read error for ' + postId + ': ' + (err.message||err), true);
+      });
 
       postsDiv.appendChild(postDiv);
-    }
-  });
-}
-        // timestamp
-        const small = document.createElement('small'); small.textContent = 'Posted at: ' + esc(p.timestamp || '');
-        postDiv.appendChild(small);
-
-        // comments container
-        const commentsDiv = document.createElement('div'); commentsDiv.className = 'comments'; commentsDiv.style.marginTop='8px';
-        postDiv.appendChild(commentsDiv);
-
-        // comment UI
-        const ta = document.createElement('textarea'); ta.placeholder = 'Add a comment'; ta.style.marginTop='8px';
-        postDiv.appendChild(ta);
-        const cBtn = document.createElement('div'); cBtn.style.marginTop='6px';
-        const btn = document.createElement('button'); btn.textContent = 'Comment';
-        cBtn.appendChild(btn);
-        postDiv.appendChild(cBtn);
-
-        // wire comment add
-        btn.addEventListener('click', () => {
-          const txt = (ta.value || '').trim();
-          if(!txt){ alert('Comment cannot be empty'); return; }
-          addComment(postId, txt);
-          ta.value = '';
-        });
-
-        // attach live comments listener
-        const comRef = db.ref('posts/' + postId + '/comments');
-        comRef.on('value', snap => {
-          commentsDiv.innerHTML = '';
-          const cs = snap.val();
-          if(!cs) return;
-          Object.keys(cs).forEach(cid => {
-            const c = cs[cid];
-            const cDiv = document.createElement('div'); cDiv.className = 'comment';
-            if(c.role === 'admin'){
-              const header = document.createElement('div'); header.className = 'admin-header'; header.innerText = 'Admin'; cDiv.appendChild(header);
-            }
-            const textNode = document.createElement('div'); textNode.innerText = esc(c.text || '');
-            cDiv.appendChild(textNode);
-            commentsDiv.appendChild(cDiv);
-          });
-        }, err => {
-          logDebug('Comment read error for ' + postId + ': ' + (err.message||err), true);
-        });
-
-        postsDiv.appendChild(postDiv);
-      });
-    } catch(e){
-      logDebug('render error: ' + (e.message||e), true);
-    }
+    });
   }, err => {
     logDebug('DB read failed: ' + (err && err.message ? err.message : err), true);
     document.getElementById('static-fallback').style.display = 'block';
@@ -446,5 +360,6 @@ window.addEventListener('DOMContentLoaded', () => {
 </script>
 </body>
 </html>
+
 
 
