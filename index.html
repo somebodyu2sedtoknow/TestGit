@@ -1,208 +1,90 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>SWIL</title>
 <style>
-* { margin:0; padding:0; box-sizing:border-box; }
 body {
   font-family: Arial, sans-serif;
   background: url('https://i.pinimg.com/736x/68/aa/c8/68aac8479ce6bd16304fda727f9c2486.jpg') no-repeat center center fixed;
   background-size: cover;
-  color: black;
-  overflow-x: hidden;
-  position: relative;
 }
-#body-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-  background: url('https://64.media.tumblr.com/8871518c1f104c9cede189ba8a041913/tumblr_n02trm8qkq1svwlszo1_r1_500.gif') no-repeat center center;
-  background-size: cover; pointer-events: none; z-index: 0;
-}
-#top-banner { position: fixed; top: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 600px; z-index: 1; }
-h1, h2 { position: relative; z-index: 2; }
-h1 { text-align: center; font-size: 5em; color: black; -webkit-text-stroke: 2px red; margin-top: 150px; }
-h2 { text-align: center; font-size: 1.2em; margin-bottom: 50px; color: black; -webkit-text-stroke: 1px red; }
-#login-section, #post-section { width: 80%; max-width: 800px; margin: auto; background: rgba(255,255,255,0.8); padding: 20px; border-radius: 10px; margin-bottom: 30px; position: relative; z-index: 2; }
-#posts { margin: 20px auto; width: 80%; max-width: 800px; position: relative; z-index:2; }
-.post, .comment { background: rgba(255,255,255,0.9); margin: 10px 0; padding: 10px; border-radius: 8px; }
-.post small { display: block; font-size: 0.8em; color: gray; margin-top: 5px; }
-.comment.admin-header { font-weight: bold; color: black; -webkit-text-stroke-width: 1.2px; -webkit-text-stroke-color: red; text-shadow: 2px 0 red,-2px 0 red,0 2px red,0 -2px red; margin-bottom: 5px; }
-.comment > div { margin-top: 5px; }
-input, textarea, select { width: 100%; margin: 5px 0; padding: 5px; }
-button { padding: 5px 10px; margin-top: 5px; cursor: pointer; }
-#password-div { margin-top: 10px;}
-#role-status { margin-top: 8px; font-size: 0.9em; color: #333; }
+#posts { max-width: 800px; margin: 20px auto; }
+.post, .comment { background: rgba(255,255,255,0.9); padding: 10px; border-radius: 8px; margin: 10px 0; }
+.comment.admin-header { font-weight: bold; color: red; }
 </style>
 </head>
 <body>
-<div id="body-overlay"></div>
-<img id="top-banner" src="https://media.tenor.com/lu7ZRQm96x0AAAAi/heart-banner-kawaii.gif" />
 <h1>SWIL</h1>
 <h2>Sharing - What - I - Like</h2>
 
 <div id="login-section">
-  <label>Select Role:</label>
   <select id="role-select" onchange="togglePasswordField()">
     <option value="guest">Guest</option>
     <option value="admin">Admin</option>
   </select>
   <div id="password-div" style="display:none;">
-    <input type="password" id="admin-password" placeholder="Enter admin password" />
+    <input type="password" id="admin-password" placeholder="Admin password">
   </div>
   <button onclick="login()">Login</button>
   <div id="role-status">Role: guest</div>
 </div>
 
 <div id="post-section" style="display:none;">
-  <h3>Create a Post</h3>
-  <textarea id="post-text" placeholder="Text"></textarea>
+  <textarea id="post-text" placeholder="Write a post..."></textarea>
+  <input type="file" id="post-file">
   <button onclick="createPost()">Post</button>
 </div>
 
 <div id="posts"></div>
 
-<!-- small sounds kept out for clarity -->
-
-<!-- MODULE Firebase + app logic -->
 <script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js";
-  import { getDatabase, ref, push, onValue, set } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-database.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js";
+import { getDatabase, ref, push, set, onValue } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-database.js";
+import { getStorage, ref as sRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-storage.js";
 
-  // --- YOUR FIREBASE CONFIG (already from your project) ---
-  const firebaseConfig = {
-    apiKey: "AIzaSyAzZWzC7n-XKAdlCLrGM3TPDl9Uo5rUKzY",
-    authDomain: "swil-eb81a.firebaseapp.com",
-    databaseURL: "https://swil-eb81a-default-rtdb.firebaseio.com",
-    projectId: "swil-eb81a",
-    storageBucket: "swil-eb81a.firebasestorage.app",
-    messagingSenderId: "964324457027",
-    appId: "1:964324457027:web:9c1e7f6331a8c59b52f2f6",
-    measurementId: "G-TXP1TJTDD0"
-  };
+const firebaseConfig = {
+  apiKey: "AIzaSyAzZWzC7n-XKAdlCLrGM3TPDl9Uo5rUKzY",
+  authDomain: "swil-eb81a.firebaseapp.com",
+  databaseURL: "https://swil-eb81a-default-rtdb.firebaseio.com",
+  projectId: "swil-eb81a",
+  storageBucket: "swil-eb81a.appspot.com",
+  messagingSenderId: "964324457027",
+  appId: "1:964324457027:web:9c1e7f6331a8c59b52f2f6"
+};
 
-  // init firebase
-  const app = initializeApp(firebaseConfig);
-  const db = getDatabase(app);
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+const storage = getStorage(app);
 
-  let role = "guest";
+let role = "guest";
 
-  // expose toggle so onchange attribute works
-  window.togglePasswordField = function () {
-    try {
-      const sel = document.getElementById('role-select').value;
-      document.getElementById('password-div').style.display = (sel === 'admin') ? 'block' : 'none';
-    } catch (e) { console.error(e); }
-  };
+window.togglePasswordField = function() {
+  document.getElementById("password-div").style.display =
+    document.getElementById("role-select").value === "admin" ? "block" : "none";
+};
 
-  // expose login
-  window.login = function () {
-    try {
-      const selectedRole = document.getElementById('role-select').value;
-      const password = document.getElementById('admin-password').value;
-      const postSection = document.getElementById('post-section');
-
-      if (selectedRole === 'admin' && password === 'didifuckingstutter') {
-        role = 'admin';
-        postSection.style.display = 'block';
-        alert('✅ Logged in as Admin');
-      } else {
-        role = 'guest';
-        postSection.style.display = 'none';
-        alert('👤 Logged in as Guest');
-      }
-      document.getElementById('role-status').innerText = 'Role: ' + role;
-      console.log('Current role:', role);
-    } catch (e) {
-      console.error('login error', e);
-      alert('Login error — open console for details');
-    }
-  };
-
-  // Create Post (admin only)
-  window.createPost = async function () {
-    if (role !== 'admin') { alert('Only admin can create posts.'); return; }
-    const textEl = document.getElementById('post-text');
-    const text = textEl.value.trim();
-    if (!text) { alert('Post text cannot be empty'); return; }
-
-    try {
-      const postsRef = ref(db, 'posts');
-      const newPostRef = push(postsRef);
-      await set(newPostRef, {
-        text: text,
-        timestamp: new Date().toLocaleString(),
-        role: role
-      });
-      textEl.value = '';
-      alert('Post created ✅');
-    } catch (err) {
-      console.error('createPost error', err);
-      alert('Failed to create post — check console (and DB rules).');
-    }
-  };
-
-  // render helper (basic escape)
-  function escapeHtml(s = '') {
-    return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+window.login = function() {
+  const sel = document.getElementById("role-select").value;
+  const pass = document.getElementById("admin-password").value;
+  if (sel === "admin" && pass === "didifuckingstutter") {
+    role = "admin";
+    document.getElementById("post-section").style.display = "block";
+    alert("Logged in as Admin");
+  } else {
+    role = "guest";
+    document.getElementById("post-section").style.display = "none";
+    alert("Logged in as Guest");
   }
+  document.getElementById("role-status").innerText = "Role: " + role;
+};
 
-  // load comments and update live
-  function loadComments(postId, container) {
-    const commentsRef = ref(db, `posts/${postId}/comments`);
-    onValue(commentsRef, (snap) => {
-      container.innerHTML = '';
-      const data = snap.val();
-      if (!data) return;
-      Object.keys(data).forEach(key => {
-        const c = data[key];
-        const commentDiv = document.createElement('div');
-        commentDiv.className = 'comment';
-        if (c.role === 'admin') {
-          const header = document.createElement('div');
-          header.className = 'admin-header';
-          header.innerText = 'Admin';
-          commentDiv.appendChild(header);
-        }
-        const textNode = document.createElement('div');
-        textNode.innerText = c.text;
-        commentDiv.appendChild(textNode);
-        container.appendChild(commentDiv);
-      });
-    }, (err) => {
-      console.error('loadComments error', err);
-    });
-  }
+window.createPost = async function() {
+  if (role !== "admin") return;
+  const text = document.getElementById("post-text").value.trim();
+  const file = document.getElementById("post-file").files[0];
+  let fileUrl = "";
 
-  // load posts live
-  function loadPosts() {
-    const postsRef = ref(db, 'posts');
-    const postsDiv = document.getElementById('posts');
-
-    onValue(postsRef, (snapshot) => {
-      postsDiv.innerHTML = '';
-      const data = snapshot.val();
-      if (!data) {
-        postsDiv.innerHTML = '<div class="post"><p>No posts yet.</p></div>';
-        return;
-      }
-      Object.keys(data).reverse().forEach(postId => {
-        const post = data[postId];
-        const postDiv = document.createElement('div');
-        postDiv.className = 'post';
-
-        const badge = (post.role === 'admin') ? "<strong style='color:red'>[Admin]</strong> " : "";
-        // build inner html
-        postDiv.innerHTML = `
-          <p>${badge}${escapeHtml(post.text)}</p>
-          <small>Posted at: ${escapeHtml(post.timestamp)}</small>
-          <div class="comments" data-post-id="${postId}"></div>
-          <textarea placeholder="Add comment"></textarea>
-          <button class="add-comment">Add Comment</button>
-        `;
-        postsDiv.appendChild(postDiv);
-
-        const commentsContainer = postDiv.querySelector('.comments');
-        loadComments(postId, commentsContainer);
-
-        // add comment handler
-        postDiv
+  if (file) {
+    const fileRef = sRef(
