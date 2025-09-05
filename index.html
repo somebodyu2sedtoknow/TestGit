@@ -11,93 +11,35 @@ body {
   background: url('https://i.pinimg.com/736x/68/aa/c8/68aac8479ce6bd16304fda727f9c2486.jpg') no-repeat center center fixed;
   background-size: cover;
   color: black;
-  cursor: url('https://25.media.tumblr.com/9b61ee90f1461f2459513f123e961ddf/tumblr_mvrnn6xt151sjkr6no1_500.gif'), auto;
   overflow-x: hidden;
   position: relative;
 }
-#body-overlay {
-  position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+#body-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%;
   background: url('https://64.media.tumblr.com/8871518c1f104c9cede189ba8a041913/tumblr_n02trm8qkq1svwlszo1_r1_500.gif') no-repeat center center;
-  background-size: cover;
-  pointer-events: none;
-  z-index: 0;
+  background-size: cover; pointer-events: none; z-index: 0;
 }
-#top-banner {
-  position: fixed; top: 0; left: 50%; transform: translateX(-50%);
-  width: 100%; max-width: 600px; z-index: 1;
-}
+#top-banner { position: fixed; top: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 600px; z-index: 1; }
 h1, h2 { position: relative; z-index: 2; }
 h1 { text-align: center; font-size: 5em; color: black; -webkit-text-stroke: 2px red; margin-top: 150px; }
 h2 { text-align: center; font-size: 1.2em; margin-bottom: 50px; color: black; -webkit-text-stroke: 1px red; }
-#side-left, #side-right {
-  position: fixed; top:0; width: 80px; height: 100%;
-  background: url('https://media4.giphy.com/media/10a8AOSeP6Rqfu/200w.gif?cid=790b7611r9wo0kx37gdmv13xww5xkm93hlxjf1ez816nybk6&ep=v1_gifs_search&rid=200w.gif&ct=s') repeat-y;
-  background-size: 80px auto; z-index: 2;
-}
-#side-left { left:0; } #side-right { right:0; }
-#big-left, #big-right {
-  position: fixed; top: 0; width: 100px; height: 100%;
-  background: url('https://64.media.tumblr.com/a33b974be0ceb710cad1e2d90852ea7f/6fefe7acdbd459ca-79/s250x400/67d4aca6996622af3a2998bb085fe2982567a931.gif') no-repeat center center;
-  background-size: contain; z-index: 1;
-}
-#big-left { left: 90px; }
-#big-right { right: 90px; }
-#corner-dog { position: fixed; bottom: 20px; left: 20px; width: 80px; z-index: 10; }
-#bottom-gif { position: fixed; bottom: 0; right: 50%; transform: translateX(50%); width: 150px; z-index: 5; }
-#login-section, #post-section {
-  width: 80%; max-width: 800px; margin: auto;
-  background: rgba(255,255,255,0.8); padding: 20px; border-radius: 10px;
-  margin-bottom: 30px; position: relative; z-index: 2;
-}
+#login-section, #post-section { width: 80%; max-width: 800px; margin: auto; background: rgba(255,255,255,0.8); padding: 20px; border-radius: 10px; margin-bottom: 30px; position: relative; z-index: 2; }
 #posts { margin: 20px auto; width: 80%; max-width: 800px; position: relative; z-index:2; }
 .post, .comment { background: rgba(255,255,255,0.9); margin: 10px 0; padding: 10px; border-radius: 8px; }
 .post small { display: block; font-size: 0.8em; color: gray; margin-top: 5px; }
-.comment.admin-header {
-  font-weight: bold;
-  color: black;
-  -webkit-text-stroke-width: 1.2px;
-  -webkit-text-stroke-color: red;
-  text-shadow:
-    2px 0 red,
-    -2px 0 red,
-    0 2px red,
-    0 -2px red;
-  margin-bottom: 5px;
-}
-.comment > div {
-  margin-top: 5px;
-}
+.comment.admin-header { font-weight: bold; color: black; -webkit-text-stroke-width: 1.2px; -webkit-text-stroke-color: red; text-shadow: 2px 0 red,-2px 0 red,0 2px red,0 -2px red; margin-bottom: 5px; }
+.comment > div { margin-top: 5px; }
 input, textarea, select { width: 100%; margin: 5px 0; padding: 5px; }
 button { padding: 5px 10px; margin-top: 5px; cursor: pointer; }
 #password-div { margin-top: 10px;}
-#music-player {
-  position: fixed; bottom: 20px; right: 20px;
-  background: rgba(255,255,255,0.9);
-  padding: 10px;
-  border-radius: 8px;
-  z-index: 20;
-  width: 250px;
-}
-#music-player input { width: 100%; }
+#role-status { margin-top: 8px; font-size: 0.9em; color: #333; }
 </style>
-
-<!-- Firebase SDKs -->
-<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-analytics.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database.js"></script>
-
 </head>
 <body>
 <div id="body-overlay"></div>
 <img id="top-banner" src="https://media.tenor.com/lu7ZRQm96x0AAAAi/heart-banner-kawaii.gif" />
-<div id="side-left"></div>
-<div id="side-right"></div>
-<div id="big-left"></div>
-<div id="big-right"></div>
-<img id="corner-dog" src="https://i.gzn.jp/img/2022/02/22/fastest-gif-animation/dancing-dog-2.gif" />
-<img id="bottom-gif" src="https://platform.vox.com/wp-content/uploads/sites/2/chorus/uploads/chorus_asset/file/8688491/hiE5vMs.gif?quality=90&strip=all&crop=0,0,100,100" />
 <h1>SWIL</h1>
 <h2>Sharing - What - I - Like</h2>
+
 <div id="login-section">
   <label>Select Role:</label>
   <select id="role-select" onchange="togglePasswordField()">
@@ -108,30 +50,25 @@ button { padding: 5px 10px; margin-top: 5px; cursor: pointer; }
     <input type="password" id="admin-password" placeholder="Enter admin password" />
   </div>
   <button onclick="login()">Login</button>
+  <div id="role-status">Role: guest</div>
 </div>
+
 <div id="post-section" style="display:none;">
   <h3>Create a Post</h3>
   <textarea id="post-text" placeholder="Text"></textarea>
-  <input type="file" id="post-file" accept="image/*,video/*,gif" multiple />
   <button onclick="createPost()">Post</button>
 </div>
+
 <div id="posts"></div>
-<!-- Music Player -->
-<div id="music-player">
-  <input type="text" id="music-url" placeholder="YouTube URL" />
-  <button onclick="playMusic()">Play</button>
-  <div id="music-container"></div>
-</div>
-<audio id="fart-sound" src="https://www.soundjay.com/human/fart-01.mp3"></audio>
-<audio id="dog-bark" src="https://www.soundjay.com/dog/dog-bark-1.mp3"></audio>
 
+<!-- small sounds kept out for clarity -->
 
+<!-- MODULE Firebase + app logic -->
 <script type="module">
-  // Import Firebase
   import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js";
   import { getDatabase, ref, push, onValue, set } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-database.js";
 
-  // Firebase Config
+  // --- YOUR FIREBASE CONFIG (already from your project) ---
   const firebaseConfig = {
     apiKey: "AIzaSyAzZWzC7n-XKAdlCLrGM3TPDl9Uo5rUKzY",
     authDomain: "swil-eb81a.firebaseapp.com",
@@ -143,87 +80,129 @@ button { padding: 5px 10px; margin-top: 5px; cursor: pointer; }
     measurementId: "G-TXP1TJTDD0"
   };
 
-  // Init
+  // init firebase
   const app = initializeApp(firebaseConfig);
   const db = getDatabase(app);
 
   let role = "guest";
 
-  // Toggle Password Input
+  // expose toggle so onchange attribute works
   window.togglePasswordField = function () {
-    const selectedRole = document.getElementById("role-select").value;
-    document.getElementById("password-div").style.display =
-      selectedRole === "admin" ? "block" : "none";
+    try {
+      const sel = document.getElementById('role-select').value;
+      document.getElementById('password-div').style.display = (sel === 'admin') ? 'block' : 'none';
+    } catch (e) { console.error(e); }
   };
 
-  // Login Function
+  // expose login
   window.login = function () {
-    const selectedRole = document.getElementById("role-select").value;
-    const password = document.getElementById("admin-password").value;
-    const postSection = document.getElementById("post-section");
+    try {
+      const selectedRole = document.getElementById('role-select').value;
+      const password = document.getElementById('admin-password').value;
+      const postSection = document.getElementById('post-section');
 
-    if (selectedRole === "admin" && password === "didifuckingstutter") {
-      role = "admin";
-      alert("✅ Logged in as Admin");
-      postSection.style.display = "block";
-    } else {
-      role = "guest";
-      alert("👤 Logged in as Guest");
-      postSection.style.display = "none";
+      if (selectedRole === 'admin' && password === 'didifuckingstutter') {
+        role = 'admin';
+        postSection.style.display = 'block';
+        alert('✅ Logged in as Admin');
+      } else {
+        role = 'guest';
+        postSection.style.display = 'none';
+        alert('👤 Logged in as Guest');
+      }
+      document.getElementById('role-status').innerText = 'Role: ' + role;
+      console.log('Current role:', role);
+    } catch (e) {
+      console.error('login error', e);
+      alert('Login error — open console for details');
     }
   };
 
-  // Create Post
-  window.createPost = function () {
-    if (role !== "admin") return;
+  // Create Post (admin only)
+  window.createPost = async function () {
+    if (role !== 'admin') { alert('Only admin can create posts.'); return; }
+    const textEl = document.getElementById('post-text');
+    const text = textEl.value.trim();
+    if (!text) { alert('Post text cannot be empty'); return; }
 
-    const text = document.getElementById("post-text").value.trim();
-    if (!text) return;
-
-    const postsRef = ref(db, "posts");
-    const newPost = push(postsRef);
-
-    set(newPost, {
-      text: text,
-      timestamp: new Date().toLocaleString(),
-      role: role
-    });
-
-    document.getElementById("post-text").value = "";
+    try {
+      const postsRef = ref(db, 'posts');
+      const newPostRef = push(postsRef);
+      await set(newPostRef, {
+        text: text,
+        timestamp: new Date().toLocaleString(),
+        role: role
+      });
+      textEl.value = '';
+      alert('Post created ✅');
+    } catch (err) {
+      console.error('createPost error', err);
+      alert('Failed to create post — check console (and DB rules).');
+    }
   };
 
-  // Load Posts
-  function loadPosts() {
-    const postsDiv = document.getElementById("posts");
-    const postsRef = ref(db, "posts");
+  // render helper (basic escape)
+  function escapeHtml(s = '') {
+    return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
 
-    onValue(postsRef, (snapshot) => {
-      postsDiv.innerHTML = "";
-      const data = snapshot.val();
+  // load comments and update live
+  function loadComments(postId, container) {
+    const commentsRef = ref(db, `posts/${postId}/comments`);
+    onValue(commentsRef, (snap) => {
+      container.innerHTML = '';
+      const data = snap.val();
       if (!data) return;
-
-      Object.keys(data).reverse().forEach((postId) => {
-        const post = data[postId];
-        const postDiv = document.createElement("div");
-        postDiv.className = "post";
-
-        const badge = post.role === "admin" ? "<strong style='color:red'>[Admin]</strong> " : "";
-
-        postDiv.innerHTML = `
-          <p>${badge}${post.text}</p>
-          <small>Posted at: ${post.timestamp}</small>
-        `;
-        postsDiv.appendChild(postDiv);
+      Object.keys(data).forEach(key => {
+        const c = data[key];
+        const commentDiv = document.createElement('div');
+        commentDiv.className = 'comment';
+        if (c.role === 'admin') {
+          const header = document.createElement('div');
+          header.className = 'admin-header';
+          header.innerText = 'Admin';
+          commentDiv.appendChild(header);
+        }
+        const textNode = document.createElement('div');
+        textNode.innerText = c.text;
+        commentDiv.appendChild(textNode);
+        container.appendChild(commentDiv);
       });
+    }, (err) => {
+      console.error('loadComments error', err);
     });
   }
-  loadPosts();
-</script>
 
+  // load posts live
+  function loadPosts() {
+    const postsRef = ref(db, 'posts');
+    const postsDiv = document.getElementById('posts');
 
-</body>
-</html>
+    onValue(postsRef, (snapshot) => {
+      postsDiv.innerHTML = '';
+      const data = snapshot.val();
+      if (!data) {
+        postsDiv.innerHTML = '<div class="post"><p>No posts yet.</p></div>';
+        return;
+      }
+      Object.keys(data).reverse().forEach(postId => {
+        const post = data[postId];
+        const postDiv = document.createElement('div');
+        postDiv.className = 'post';
 
+        const badge = (post.role === 'admin') ? "<strong style='color:red'>[Admin]</strong> " : "";
+        // build inner html
+        postDiv.innerHTML = `
+          <p>${badge}${escapeHtml(post.text)}</p>
+          <small>Posted at: ${escapeHtml(post.timestamp)}</small>
+          <div class="comments" data-post-id="${postId}"></div>
+          <textarea placeholder="Add comment"></textarea>
+          <button class="add-comment">Add Comment</button>
+        `;
+        postsDiv.appendChild(postDiv);
 
+        const commentsContainer = postDiv.querySelector('.comments');
+        loadComments(postId, commentsContainer);
 
-
+        // add comment handler
+        postDiv
