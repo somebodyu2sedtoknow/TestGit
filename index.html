@@ -126,186 +126,90 @@ button { padding: 5px 10px; margin-top: 5px; cursor: pointer; }
 <audio id="dog-bark" src="https://www.soundjay.com/dog/dog-bark-1.mp3"></audio>
 
 <script>
-let role = "guest";
+<script type="module">
+  // Import Firebase
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js";
+  import { getDatabase, ref, push, onValue, set } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-database.js";
 
-const firebaseConfig = {
-  apiKey: "AIzaSyD6rZ87Jbmf9G0j4fjvLgKRudyi67MmYTw",
-  authDomain: "for-website-41f5f.firebaseapp.com",
-  databaseURL: "https://for-website-41f5f-default-rtdb.firebaseio.com",
-  projectId: "for-website-41f5f",
-  storageBucket: "for-website-41f5f.firebasestorage.app",
-  messagingSenderId: "1021517463581",
-  appId: "1:1021517463581:web:f92076e5460274a6a4c6f4",
-  measurementId: "G-19172RJ3WJ"
-};
+  // Firebase Config
+  const firebaseConfig = {
+    apiKey: "YOUR_API_KEY",
+    authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+    databaseURL: "https://YOUR_PROJECT_ID-default-rtdb.firebaseio.com",
+    projectId: "YOUR_PROJECT_ID",
+    storageBucket: "YOUR_PROJECT_ID.appspot.com",
+    messagingSenderId: "YOUR_SENDER_ID",
+    appId: "YOUR_APP_ID"
+  };
 
-const app = firebase.initializeApp(firebaseConfig);
-const analytics = firebase.analytics();
-const db = firebase.database();
+  // Init
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
 
-function togglePasswordField() {
-  const selectedRole = document.getElementById('role-select').value;
-  const passwordDiv = document.getElementById('password-div');
-  passwordDiv.style.display = selectedRole === 'admin' ? 'block' : 'none';
-}
+  let role = "guest";
 
-function login() {
-  const selectedRole = document.getElementById('role-select').value;
-  const password = document.getElementById('admin-password').value;
-  const postSection = document.getElementById('post-section');
+  // Login Function
+  function login() {
+    const selectedRole = document.getElementById('role-select').value;
+    const password = document.getElementById('admin-password').value;
+    const postSection = document.getElementById('post-section');
 
-  if (selectedRole === 'admin') {
-    if (password === 'didifuckingstutter') {
-      role = 'admin';
-      alert('Logged in as admin!');
-      postSection.style.display = 'block';
+    if (selectedRole === 'admin' && password === 'didifuckingstutter') {
+      role = "admin";
+      alert("Logged in as Admin ✅");
+      postSection.style.display = "block";
     } else {
-      alert('Wrong password! Logged in as guest.');
-      role = 'guest';
-      postSection.style.display = 'none';
+      role = "guest";
+      alert("Logged in as Guest 👤");
+      postSection.style.display = "none";
     }
-  } else {
-    role = 'guest';
-    alert('Logged in as guest.');
-    postSection.style.display = 'none';
+  }
+  window.login = login;
+
+  // Create Post
+  function createPost() {
+    if (role !== "admin") return;
+
+    const text = document.getElementById("post-text").value.trim();
+    if (!text) return;
+
+    const postsRef = ref(db, "posts");
+    const newPost = push(postsRef);
+
+    set(newPost, {
+      text: text,
+      timestamp: new Date().toLocaleString()
+    });
+
+    document.getElementById("post-text").value = "";
+  }
+  window.createPost = createPost;
+
+  // Load Posts
+  function loadPosts() {
+    const postsDiv = document.getElementById("posts");
+    const postsRef = ref(db, "posts");
+
+    onValue(postsRef, (snapshot) => {
+      postsDiv.innerHTML = "";
+      const data = snapshot.val();
+      if (!data) return;
+
+      Object.keys(data).reverse().forEach(postId => {
+        const post = data[postId];
+        const postDiv = document.createElement("div");
+        postDiv.className = "post";
+        postDiv.innerHTML = `
+          <p>${post.text}</p>
+          <small>Posted at: ${post.timestamp}</small>
+        `;
+        postsDiv.appendChild(postDiv);
+      });
+    });
   }
   loadPosts();
-}
-
-function createPost() {
-  if (role !== 'admin') return;  // only admin can post
-
-  const text = document.getElementById('post-text').value.trim();
-  if (!text) {
-    alert("Post text cannot be empty!");
-    return;
-  }
-
-  const timestamp = new Date().toLocaleString();
-
-  const newPostRef = db.ref('posts').push();
-  newPostRef.set({
-    text: text,
-    timestamp: timestamp,
-    role: role
-  }).then(() => {
-    document.getElementById('post-text').value = '';
-    alert("Post created successfully!");
-  }).catch((err) => {
-    console.error("Error posting:", err);
-    alert("Failed to post. Check console for details.");
-  });
-}
-
-function loadPosts() {
-  const postsDiv = document.getElementById('posts');
-  db.ref('posts').on('value', snapshot => {
-    const posts = snapshot.val();
-    postsDiv.innerHTML = '';
-    if (!posts) return;
-
-    Object.keys(posts).reverse().forEach(postId => {
-      const post = posts[postId];
-      const postDiv = document.createElement('div');
-      postDiv.className = 'post';
-
-      // show admin badge if created by admin
-      const badge = post.role === 'admin' ? "<strong style='color:red'>[Admin]</strong> " : "";
-
-      postDiv.innerHTML = `
-        <p>${badge}${post.text}</p>
-        <small>Posted at: ${post.timestamp}</small>
-        <div class="comments"></div>
-        <textarea placeholder="Add comment"></textarea>
-        <button>Add Comment</button>
-      `;
-
-      postsDiv.appendChild(postDiv);
-
-      loadComments(postId, postDiv.querySelector('.comments'));
-
-      postDiv.querySelector('button').onclick = function () {
-        const textarea = postDiv.querySelector('textarea');
-        const commentText = textarea.value.trim();
-        if (!commentText) return;
-
-        db.ref(`posts/${postId}/comments`).push({
-          text: commentText,
-          role: role
-        });
-
-        textarea.value = '';
-      };
-    });
-  });
-}
-
-function loadComments(postId, commentsContainer) {
-  db.ref(`posts/${postId}/comments`).on('value', snapshot => {
-    const comments = snapshot.val();
-    commentsContainer.innerHTML = '';
-    if (!comments) return;
-
-    Object.keys(comments).forEach(commentId => {
-      const comment = comments[commentId];
-      const commentDiv = document.createElement('div');
-      commentDiv.className = 'comment';
-
-      if (comment.role === 'admin') {
-        const header = document.createElement('div');
-        header.className = 'admin-header';
-        header.innerText = 'Admin';
-        commentDiv.appendChild(header);
-      }
-
-      const textNode = document.createElement('div');
-      textNode.innerText = comment.text;
-      commentDiv.appendChild(textNode);
-
-      commentsContainer.appendChild(commentDiv);
-    });
-  });
-}
-
-function createFlyingGif() {
-  const gif = document.createElement('img');
-  gif.src = 'https://64.media.tumblr.com/01a1afe754400f6254b6650e20b33ef4/tumblr_pgh03shQpu1wchb2mo10_r1_250.gif';
-  gif.style.position = 'absolute';
-  gif.style.width = '100px';
-  gif.style.left = Math.random() * (window.innerWidth - 100) + 'px';
-  gif.style.top = Math.random() * (window.innerHeight - 100) + 'px';
-  document.body.appendChild(gif);
-  setTimeout(() => gif.remove(), 5000);
-}
-setInterval(createFlyingGif, 2000);
-
-document.addEventListener('click', () => {
-  document.getElementById('fart-sound').play();
-});
-
-setInterval(() => {
-  document.getElementById('dog-bark').play();
-}, 1800000);
-
-function playMusic() {
-  const url = document.getElementById('music-url').value;
-  const container = document.getElementById('music-container');
-  container.innerHTML = `<iframe width="230" height="80" src="https://www.youtube.com/embed/${getYouTubeID(url)}?autoplay=1" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>`;
-}
-
-function getYouTubeID(url) {
-  const reg = /(?:youtube\.com\/.*v=|youtu\.be\/)([^&]+)/;
-  const match = url.match(reg);
-  return match ? match[1] : '';
-}
-
-window.onload = () => {
-  document.getElementById('post-section').style.display = 'none';
-  document.getElementById('password-div').style.display = 'none';
-  document.getElementById('post-text').value = '';
-  document.getElementById('admin-password').value = '';
-  loadPosts();
-};
 </script>
+
 </body>
 </html>
+
