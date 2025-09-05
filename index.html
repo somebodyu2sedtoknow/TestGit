@@ -1,5 +1,4 @@
 <!DOCTYPE html>
- <!-- Container where posts will be displayed -->
 <html lang="en">
 <head>
 <meta charset="utf-8"/>
@@ -7,21 +6,17 @@
 <title>SWIL</title>
 <style>
   *{box-sizing:border-box;margin:0;padding:0}
-  body{font-family:Arial, sans-serif; background:url('https://i.pinimg.com/736x/68/aa/c8/68aac8479ce6bd16304fda727f9c2486.jpg') center/cover fixed; color:#000; min-height:100vh; overflow-x:hidden;}
+  body{font-family:Arial,sans-serif;background:url('https://i.pinimg.com/736x/68/aa/c8/68aac8479ce6bd16304fda727f9c2486.jpg') center/cover fixed;color:#000;min-height:100vh;overflow-x:hidden;}
   #body-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:url('https://64.media.tumblr.com/8871518c1f104c9cede189ba8a041913/tumblr_n02trm8qkq1svwlszo1_r1_500.gif') no-repeat center/cover;pointer-events:none;z-index:0}
   #top-banner{position:fixed;top:0;left:50%;transform:translateX(-50%);width:100%;max-width:600px;z-index:2}
   h1{font-size:4.5rem;text-align:center;margin-top:140px;color:black;-webkit-text-stroke:2px red;z-index:2;position:relative}
   h2{text-align:center;margin-bottom:30px;color:black;-webkit-text-stroke:1px red;position:relative;z-index:2}
-
-  /* side decorations */
   #side-left,#side-right{position:fixed;top:0;width:80px;height:100%;background:url('https://media4.giphy.com/media/10a8AOSeP6Rqfu/200w.gif') repeat-y;background-size:80px auto;z-index:2}
   #side-left{left:0}#side-right{right:0}
   #big-left,#big-right{position:fixed;top:0;width:100px;height:100%;background:url('https://64.media.tumblr.com/a33b974be0ceb710cad1e2d90852ea7f/6fefe7acdbd459ca-79/s250x400/67d4aca6996622af3a2998bb085fe2982567a931.gif') no-repeat center center;background-size:contain;z-index:1}
   #big-left{left:90px}#big-right{right:90px}
   #corner-dog{position:fixed;bottom:20px;left:20px;width:80px;z-index:10}
   #bottom-gif{position:fixed;bottom:0;right:50%;transform:translateX(50%);width:150px;z-index:5}
-
-  /* UI boxes */
   #login-section,#post-section{width:90%;max-width:820px;margin:12px auto;background:rgba(255,255,255,0.9);padding:14px;border-radius:10px;position:relative;z-index:3}
   #posts{width:90%;max-width:820px;margin:12px auto 160px auto;position:relative;z-index:3}
   .post,.comment{background:rgba(255,255,255,0.98);padding:10px;border-radius:8px;margin:10px 0}
@@ -32,8 +27,6 @@
   button{padding:7px 10px;border-radius:6px;border:0;background:#222;color:#fff;cursor:pointer}
   #music-player{position:fixed;bottom:20px;right:20px;background:rgba(255,255,255,0.95);padding:10px;border-radius:8px;width:260px;z-index:999}
   #debug{position:fixed;right:10px;bottom:10px;max-width:420px;background:rgba(0,0,0,0.72);color:#fff;padding:8px;border-radius:8px;z-index:9999;font-size:0.85rem;overflow:auto;max-height:220px}
-  .debug-error{color:#ff9b9b}
-  .static-fallback{width:90%;max-width:820px;margin:12px auto;position:relative;z-index:3}
 </style>
 </head>
 <body>
@@ -51,7 +44,7 @@
 <!-- LOGIN -->
 <div id="login-section">
   <label for="role-select">Select Role:</label>
-  <select id="role-select" onchange="togglePasswordField()">
+  <select id="role-select">
     <option value="guest">Guest</option>
     <option value="admin">Admin</option>
   </select>
@@ -75,14 +68,8 @@
     <button onclick="createPost()">Post</button>
   </div>
 </div>
-<!-- POSTS container -->
-<div id="posts-container" style="margin-top:20px;"></div>
-<!-- fallback -->
-<div id="static-fallback" class="static-fallback">
-  <div class="post"><p><strong>[Admin]</strong> Static fallback post — visible if DB unreadable.</p><small>Fallback: visible when DB fails</small></div>
-</div>
 
-<!-- POSTS -->
+<!-- POSTS container -->
 <div id="posts"></div>
 
 <!-- Music player -->
@@ -98,17 +85,16 @@
 <!-- Debug box -->
 <div id="debug" aria-live="polite"></div>
 
-<!-- Firebase compat libs (non-module so functions remain global) -->
+<!-- Firebase compat libs -->
 <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-storage-compat.js"></script>
 
 <script>
-/* --------- CONFIG (your project) ---------- */
 const firebaseConfig = {
   apiKey: "AIzaSyAzZWzC7n-XKAdlCLrGM3TPDl9Uo5rUKzY",
   authDomain: "swil-eb81a.firebaseapp.com",
-  databaseURL: "https://swil-eb81a-default-rtdb.firebaseio.com", 
+  databaseURL: "https://swil-eb81a-default-rtdb.firebaseio.com",
   projectId: "swil-eb81a",
   storageBucket: "swil-eb81a.appspot.com",
   messagingSenderId: "964324457027",
@@ -116,338 +102,146 @@ const firebaseConfig = {
   measurementId: "G-TXP1TJTDD0"
 };
 
-/* ----------------------------------------- */
-
-function logDebug(msg, isError=false){
-  const d = document.getElementById('debug');
-  const el = document.createElement('div');
-  if(isError) el.className = 'debug-error';
-  el.textContent = `${new Date().toLocaleTimeString()} — ${msg}`;
-  d.prepend(el);
-  console[isError ? 'error' : 'log'](msg);
-}
-
-try {
-  // ✅ Initialize Firebase
-  firebase.initializeApp(firebaseConfig);
-  console.log("Firebase initialized ✅");
-
-  // ✅ Test DB read
-  const dbTest = firebase.database().ref("posts");
-  dbTest.get().then((snapshot) => {
-    if (snapshot.exists()) {
-      console.log("✅ Posts from DB:", snapshot.val());
-    } else {
-      console.log("⚠️ No data available in posts");
-    }
-  }).catch((error) => {
-    console.error("❌ DB read error:", error);
-  });
-
-} catch(e){
-  logDebug('Firebase init failed: ' + (e.message||e), true);
-}
-
-// main DB + storage handles
+firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 const storage = firebase.storage();
 let role = 'guest';
 
-/* expose toggle so select onchange works */
-window.togglePasswordField = function(){
-  try {
-    const sel = document.getElementById('role-select').value;
-    document.getElementById('password-div').style.display = sel === 'admin' ? 'block' : 'none';
-  } catch(e){ logDebug('toggle error: '+e.message, true); }
-};
-
-/* login */
-window.login = function(){
-  try {
-    const sel = document.getElementById('role-select').value;
-    const pass = document.getElementById('admin-password').value || '';
-    if(sel === 'admin' && pass === 'didifuckingstutter'){
-      role = 'admin';
-      document.getElementById('post-section').style.display = 'block';
-      alert('✅ Logged in as Admin');
-      logDebug('Logged in as admin');
-    } else {
-      role = 'guest';
-      document.getElementById('post-section').style.display = 'none';
-      alert('👤 Logged in as Guest');
-      logDebug('Logged in as guest');
-    }
-    document.getElementById('role-status').innerText = 'Role: ' + role;
-  } catch(e){ logDebug('login error: '+(e.message||e), true); alert('Login error — open debug box'); }
-};
-
-/* helper: unique filename */
-function uniqueName(name){
-  return Date.now() + '_' + Math.random().toString(36).slice(2,9) + '_' + name.replace(/\s+/g,'_');
+/* Debug helper */
+function logDebug(msg, isError=false){
+  const d = document.getElementById('debug');
+  const el = document.createElement('div');
+  if(isError) el.className='debug-error';
+  el.textContent = `${new Date().toLocaleTimeString()} — ${msg}`;
+  d.prepend(el);
+  console[isError?'error':'log'](msg);
 }
 
-/* upload array of files -> returns Promise(array of URLs) */
-function uploadFiles(files){
-  if(!files || files.length === 0) return Promise.resolve([]);
-  const arr = Array.from(files);
-  const promises = arr.map(file => {
-    const path = 'uploads/' + uniqueName(file.name);
-    const ref = storage.ref(path);
-    return ref.put(file).then(snapshot => snapshot.ref.getDownloadURL());
-  });
-  return Promise.all(promises);
-}
+/* Admin login toggle */
+document.getElementById('role-select').addEventListener('change', ()=>{
+  document.getElementById('password-div').style.display = document.getElementById('role-select').value==='admin'?'block':'none';
+});
 
-/* create post (admin only, now with image URL instead of upload) */
-window.createPost = function () {
-  try {
-    if (role !== 'admin') {
-      alert('Only admin can create posts');
-      return;
-    }
-
-    const text = document.getElementById('post-text').value.trim();
-    const imgUrl = document.getElementById('post-img').value.trim();
-
-    if (!text && !imgUrl) {
-      alert("Please write something or add an image URL");
-      return;
-    }
-
-    const db = firebase.database();
-    const postsRef = db.ref('posts');
-    const newRef = postsRef.push();
-
-    newRef.set({
-      text: text,
-      img: imgUrl || null,
-      role: role,
-      time: new Date().toLocaleString()
-    });
-
-    // clear inputs
-    document.getElementById('post-text').value = "";
-    document.getElementById('post-img').value = "";
-
-    alert("✅ Post created!");
-  } catch (e) {
-    console.error("❌ createPost error:", e);
-    alert("Failed to create post — check console");
+/* Login function */
+function login(){
+  const sel = document.getElementById('role-select').value;
+  const pass = document.getElementById('admin-password').value||'';
+  if(sel==='admin' && pass==='didifuckingstutter'){
+    role='admin';
+    document.getElementById('post-section').style.display='block';
+    alert('✅ Logged in as Admin');
+  } else {
+    role='guest';
+    document.getElementById('post-section').style.display='none';
+    alert('👤 Logged in as Guest');
   }
-};
-
-// function to display posts
-function displayPosts() {
-  const postsRef = firebase.database().ref('posts');
-  const container = document.getElementById('posts-container');
-  container.innerHTML = '';
-
-  postsRef.on('value', (snapshot) => {
-    container.innerHTML = '';
-    snapshot.forEach((childSnap) => {
-      const post = childSnap.val();
-
-      const postEl = document.createElement('div');
-      postEl.className = 'post';
-
-      // Add text
-      if (post.text) {
-        const p = document.createElement('p');
-        p.textContent = post.text;
-        postEl.appendChild(p);
-      }
-
-      // Add image if URL exists
-      if (post.img) {
-        const img = document.createElement('img');
-        img.src = post.img; // the URL from your input
-        img.style.maxWidth = '100%';
-        img.alt = 'Post image';
-        postEl.appendChild(img);
-      }
-
-      // Add time
-      const time = document.createElement('small');
-      time.textContent = post.time;
-      postEl.appendChild(time);
-
-      container.appendChild(postEl);
-    });
-  });
+  document.getElementById('role-status').innerText='Role: '+role;
 }
 
-// call it once to load posts
-displayPosts();
+/* Create Post */
+function createPost(){
+  if(role!=='admin'){ alert('Only admin can create posts'); return; }
+  const text = document.getElementById('post-text').value.trim();
+  const imgUrl = document.getElementById('post-img').value.trim();
+  if(!text && !imgUrl){ alert('Write text or provide image URL'); return; }
 
-    alert('Post created ✅');
-  } catch(err){
-    logDebug('createPost error: ' + (err && err.message ? err.message : err), true);
-    alert('Failed to create post — check debug box.');
-  }
-};
-
-/* add comment helper */
-function addComment(postId, text){
-  if(!text) return;
-  const cRef = db.ref('posts/' + postId + '/comments').push();
-  cRef.set({ text: text, role: role, timestamp: new Date().toLocaleString() })
-    .catch(e => { logDebug('addComment error: '+(e.message||e), true); });
-}
-
-/* escape text for safety */
-function esc(s){ return (s===null||s===undefined) ? '' : String(s); }
-
-/* render posts & comments live */
-function startListening() {
-  const db = firebase.database();
   const postsRef = db.ref('posts');
+  const newRef = postsRef.push();
+  newRef.set({
+    text: text,
+    img: imgUrl||null,
+    role: role,
+    time: new Date().toLocaleString()
+  });
 
-  postsRef.on('value', function(snapshot) {
+  document.getElementById('post-text').value='';
+  document.getElementById('post-img').value='';
+  alert('✅ Post created!');
+}
+
+/* Display posts and comments */
+function startListening(){
+  const postsRef = db.ref('posts');
+  postsRef.on('value', snapshot=>{
     const posts = snapshot.val();
     const postsDiv = document.getElementById('posts');
-    postsDiv.innerHTML = "";
+    postsDiv.innerHTML='';
 
-    for (let id in posts) {
-      const p = posts[id];
+    if(!posts) return;
+
+    for(let postId in posts){
+      const p = posts[postId];
       const postDiv = document.createElement('div');
-      postDiv.classList.add("post");
+      postDiv.className='post';
 
-      // Add post text
-      if (p.text) {
-        const text = document.createElement('p');
-        text.innerText = p.text;
-        postDiv.appendChild(text);
-      }
+      if(p.text){ const t=document.createElement('p'); t.innerText=p.text; postDiv.appendChild(t); }
+      if(p.img){ const img=document.createElement('img'); img.src=p.img; img.style.maxWidth='300px'; img.style.display='block'; img.style.marginTop='8px'; postDiv.appendChild(img); }
 
-      // Add post image if exists
-      if (p.img) {
-        const img = document.createElement('img');
-        img.src = p.img;
-        img.style.maxWidth = "300px";
-        img.style.display = "block";
-        img.style.marginTop = "8px";
-        postDiv.appendChild(img);
-      }
+      const small=document.createElement('small'); small.textContent='Posted at: '+(p.time||''); postDiv.appendChild(small);
 
-      // Add post video if exists
-      if (p.video) {
-        const video = document.createElement('video');
-        video.src = p.video;
-        video.controls = true;
-        video.style.maxWidth = "300px";
-        video.style.display = "block";
-        video.style.marginTop = "8px";
-        postDiv.appendChild(video);
-      }
+      /* Comments container */
+      const commentsDiv=document.createElement('div'); commentsDiv.className='comments'; commentsDiv.style.marginTop='8px'; postDiv.appendChild(commentsDiv);
+
+      const ta=document.createElement('textarea'); ta.placeholder='Add a comment'; ta.style.marginTop='8px'; postDiv.appendChild(ta);
+      const cBtn=document.createElement('div'); cBtn.style.marginTop='6px';
+      const btn=document.createElement('button'); btn.textContent='Comment'; cBtn.appendChild(btn); postDiv.appendChild(cBtn);
+
+      btn.addEventListener('click', ()=>{
+        const txt=(ta.value||'').trim(); if(!txt){ alert('Comment cannot be empty'); return; }
+        db.ref('posts/'+postId+'/comments').push({text:txt,role:role,timestamp:new Date().toLocaleString()});
+        ta.value='';
+      });
+
+      db.ref('posts/'+postId+'/comments').on('value', snap=>{
+        commentsDiv.innerHTML='';
+        const cs = snap.val(); if(!cs) return;
+        for(let cid in cs){
+          const c = cs[cid];
+          const cDiv=document.createElement('div'); cDiv.className='comment';
+          if(c.role==='admin'){ const h=document.createElement('div'); h.className='admin-header'; h.innerText='Admin'; cDiv.appendChild(h); }
+          const txtNode=document.createElement('div'); txtNode.innerText=c.text||''; cDiv.appendChild(txtNode);
+          commentsDiv.appendChild(cDiv);
+        }
+      });
 
       postsDiv.appendChild(postDiv);
     }
-  });
-}
-        // timestamp
-        const small = document.createElement('small'); small.textContent = 'Posted at: ' + esc(p.timestamp || '');
-        postDiv.appendChild(small);
-
-        // comments container
-        const commentsDiv = document.createElement('div'); commentsDiv.className = 'comments'; commentsDiv.style.marginTop='8px';
-        postDiv.appendChild(commentsDiv);
-
-        // comment UI
-        const ta = document.createElement('textarea'); ta.placeholder = 'Add a comment'; ta.style.marginTop='8px';
-        postDiv.appendChild(ta);
-        const cBtn = document.createElement('div'); cBtn.style.marginTop='6px';
-        const btn = document.createElement('button'); btn.textContent = 'Comment';
-        cBtn.appendChild(btn);
-        postDiv.appendChild(cBtn);
-
-        // wire comment add
-        btn.addEventListener('click', () => {
-          const txt = (ta.value || '').trim();
-          if(!txt){ alert('Comment cannot be empty'); return; }
-          addComment(postId, txt);
-          ta.value = '';
-        });
-
-        // attach live comments listener
-        const comRef = db.ref('posts/' + postId + '/comments');
-        comRef.on('value', snap => {
-          commentsDiv.innerHTML = '';
-          const cs = snap.val();
-          if(!cs) return;
-          Object.keys(cs).forEach(cid => {
-            const c = cs[cid];
-            const cDiv = document.createElement('div'); cDiv.className = 'comment';
-            if(c.role === 'admin'){
-              const header = document.createElement('div'); header.className = 'admin-header'; header.innerText = 'Admin'; cDiv.appendChild(header);
-            }
-            const textNode = document.createElement('div'); textNode.innerText = esc(c.text || '');
-            cDiv.appendChild(textNode);
-            commentsDiv.appendChild(cDiv);
-          });
-        }, err => {
-          logDebug('Comment read error for ' + postId + ': ' + (err.message||err), true);
-        });
-
-        postsDiv.appendChild(postDiv);
-      });
-    } catch(e){
-      logDebug('render error: ' + (e.message||e), true);
-    }
-  }, err => {
-    logDebug('DB read failed: ' + (err && err.message ? err.message : err), true);
-    document.getElementById('static-fallback').style.display = 'block';
-  });
+  }, err=>{ logDebug('DB read failed: '+(err.message||err),true); });
 }
 
-/* Music player (YouTube) */
-window.playMusic = function(){
-  try {
-    const url = document.getElementById('music-url').value.trim();
-    if(!url) return alert('Paste a YouTube URL');
-    const m = url.match(/(?:youtube\.com.*v=|youtu\.be\/)([^&\?/]+)/);
-    if(!m) return alert('Invalid YouTube URL');
-    const id = m[1];
-    document.getElementById('music-container').innerHTML = `<iframe width="230" height="80" src="https://www.youtube.com/embed/${id}?autoplay=1" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>`;
-  } catch(e){ logDebug('playMusic error: '+(e.message||e), true); }
-};
+/* Music player */
+function playMusic(){
+  const url=document.getElementById('music-url').value.trim();
+  if(!url) return alert('Paste a YouTube URL');
+  const m=url.match(/(?:youtube\.com.*v=|youtu\.be\/)([^&\?/]+)/);
+  if(!m) return alert('Invalid YouTube URL');
+  const id=m[1];
+  document.getElementById('music-container').innerHTML=`<iframe width="230" height="80" src="https://www.youtube.com/embed/${id}?autoplay=1" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>`;
+}
 
-/* flying GIF every 2s */
+/* Flying GIF */
 function createFlyingGif(){
-  try {
-    const gif = document.createElement('img');
-    gif.src = 'https://images.squarespace-cdn.com/content/v1/63d184ab563ef27ae4e812ff/a9e680c6-c461-4ff4-a21a-277b00f453aa/Animation+Artist+-+Headexplodie+-+Totally+Reps+33.GIF';
-    gif.style.position = 'absolute';
-    gif.style.width = '120px';
-    gif.style.zIndex = 9998;
-    gif.style.left = Math.random() * (window.innerWidth - 150) + 'px';
-    gif.style.top = Math.random() * (window.innerHeight - 150) + 'px';
-    document.body.appendChild(gif);
-    setTimeout(()=> gif.remove(), 5000);
-  } catch(e){ console.error(e); }
+  const gif=document.createElement('img');
+  gif.src='https://images.squarespace-cdn.com/content/v1/63d184ab563ef27ae4e812ff/a9e680c6-c461-4ff4-a21a-277b00f453aa/Animation+Artist+-+Headexplodie+-+Totally+Reps+33.GIF';
+  gif.style.position='absolute'; gif.style.width='120px'; gif.style.zIndex=9998;
+  gif.style.left=Math.random()*(window.innerWidth-150)+'px';
+  gif.style.top=Math.random()*(window.innerHeight-150)+'px';
+  document.body.appendChild(gif);
+  setTimeout(()=>gif.remove(),5000);
 }
-setInterval(createFlyingGif, 2000);
+setInterval(createFlyingGif,2000);
 
-/* fart sound on click */
-document.addEventListener('click', () => {
-  try { document.getElementById('fart-sound').play().catch(()=>{}); } catch(e) {}
-});
+/* Fart sound */
+document.addEventListener('click', ()=>{ try{ document.getElementById('fart-sound').play().catch(()=>{}); }catch(e){} });
 
-/* init on DOMContentLoaded */
-window.addEventListener('DOMContentLoaded', () => {
-  try {
-    document.getElementById('post-section').style.display = 'none';
-    document.getElementById('password-div').style.display = 'none';
-    document.getElementById('role-status').innerText = 'Role: guest';
-    document.getElementById('role-select').addEventListener('change', togglePasswordField);
-    startListening();
-    logDebug('App initialized and listening for posts...');
-  } catch(e){ logDebug('init error: ' + (e.message||e), true); }
+/* Init */
+window.addEventListener('DOMContentLoaded', ()=>{
+  document.getElementById('post-section').style.display='none';
+  document.getElementById('password-div').style.display='none';
+  document.getElementById('role-status').innerText='Role: guest';
+  startListening();
+  logDebug('App initialized and listening for posts...');
 });
 </script>
 </body>
 </html>
-
-
-
-
-
