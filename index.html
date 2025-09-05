@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+ <!-- Container where posts will be displayed -->
 <html lang="en">
 <head>
 <meta charset="utf-8"/>
@@ -67,10 +68,15 @@
 <div id="post-section" style="display:none;">
   <h3>Create a Post</h3>
   <textarea id="post-text" placeholder="Write something..."></textarea>
-  <div style="margin-top:8px;"><input id="post-file" type="file" multiple accept="image/*,video/*,audio/*"></div>
-  <div style="margin-top:8px"><button onclick="createPost()">Post</button></div>
+  <div style="margin-top:8px;">
+    <input id="post-img" type="text" placeholder="Paste image URL (optional)" />
+  </div>
+  <div style="margin-top:8px">
+    <button onclick="createPost()">Post</button>
+  </div>
 </div>
-
+<!-- POSTS container -->
+<div id="posts-container" style="margin-top:20px;"></div>
 <!-- fallback -->
 <div id="static-fallback" class="static-fallback">
   <div class="post"><p><strong>[Admin]</strong> Static fallback post — visible if DB unreadable.</p><small>Fallback: visible when DB fails</small></div>
@@ -192,30 +198,86 @@ function uploadFiles(files){
   return Promise.all(promises);
 }
 
-/* create post (admin only) */
-window.createPost = async function(){
+/* create post (admin only, now with image URL instead of upload) */
+window.createPost = function () {
   try {
-    if(role !== 'admin'){ alert('Only admin can create posts'); return; }
-    const text = (document.getElementById('post-text').value || '').trim();
-    const fileInput = document.getElementById('post-file');
-    if(!text && (!fileInput || fileInput.files.length === 0)){ alert('Write text or choose file'); return; }
+    if (role !== 'admin') {
+      alert('Only admin can create posts');
+      return;
+    }
 
-    // upload files first
-    logDebug('Uploading files (if any)...');
-    const urls = await uploadFiles(fileInput.files);
-    logDebug('Uploaded files: ' + (urls.length ? urls.join(', ') : 'none'));
+    const text = document.getElementById('post-text').value.trim();
+    const imgUrl = document.getElementById('post-img').value.trim();
 
-    const newRef = db.ref('posts').push();
-    await newRef.set({
-      text: text || '',
-      files: urls.length ? urls : null,
+    if (!text && !imgUrl) {
+      alert("Please write something or add an image URL");
+      return;
+    }
+
+    const db = firebase.database();
+    const postsRef = db.ref('posts');
+    const newRef = postsRef.push();
+
+    newRef.set({
+      text: text,
+      img: imgUrl || null,
       role: role,
-      timestamp: new Date().toLocaleString()
+      time: new Date().toLocaleString()
     });
 
-    // clear fields
-    document.getElementById('post-text').value = '';
-    if(fileInput) fileInput.value = '';
+    // clear inputs
+    document.getElementById('post-text').value = "";
+    document.getElementById('post-img').value = "";
+
+    alert("✅ Post created!");
+  } catch (e) {
+    console.error("❌ createPost error:", e);
+    alert("Failed to create post — check console");
+  }
+};
+
+// function to display posts
+function displayPosts() {
+  const postsRef = firebase.database().ref('posts');
+  const container = document.getElementById('posts-container');
+  container.innerHTML = '';
+
+  postsRef.on('value', (snapshot) => {
+    container.innerHTML = '';
+    snapshot.forEach((childSnap) => {
+      const post = childSnap.val();
+
+      const postEl = document.createElement('div');
+      postEl.className = 'post';
+
+      // Add text
+      if (post.text) {
+        const p = document.createElement('p');
+        p.textContent = post.text;
+        postEl.appendChild(p);
+      }
+
+      // Add image if URL exists
+      if (post.img) {
+        const img = document.createElement('img');
+        img.src = post.img; // the URL from your input
+        img.style.maxWidth = '100%';
+        img.alt = 'Post image';
+        postEl.appendChild(img);
+      }
+
+      // Add time
+      const time = document.createElement('small');
+      time.textContent = post.time;
+      postEl.appendChild(time);
+
+      container.appendChild(postEl);
+    });
+  });
+}
+
+// call it once to load posts
+displayPosts();
 
     alert('Post created ✅');
   } catch(err){
@@ -236,57 +298,52 @@ function addComment(postId, text){
 function esc(s){ return (s===null||s===undefined) ? '' : String(s); }
 
 /* render posts & comments live */
-function startListening(){
-  const postsDiv = document.getElementById('posts');
-  const fallback = document.getElementById('static-fallback');
+function startListening() {
+  const db = firebase.database();
   const postsRef = db.ref('posts');
 
-  postsRef.on('value', snapshot => {
-    try {
-      const data = snapshot.val();
-      postsDiv.innerHTML = '';
-      if(!data){
-        fallback.style.display = 'block';
-        logDebug('No posts in DB yet.');
-        return;
+  postsRef.on('value', function(snapshot) {
+    const posts = snapshot.val();
+    const postsDiv = document.getElementById('posts');
+    postsDiv.innerHTML = "";
+
+    for (let id in posts) {
+      const p = posts[id];
+      const postDiv = document.createElement('div');
+      postDiv.classList.add("post");
+
+      // Add post text
+      if (p.text) {
+        const text = document.createElement('p');
+        text.innerText = p.text;
+        postDiv.appendChild(text);
       }
-      fallback.style.display = 'none';
 
-      Object.keys(data).reverse().forEach(postId => {
-        const p = data[postId];
-        const postDiv = document.createElement('div'); postDiv.className = 'post';
+      // Add post image if exists
+      if (p.img) {
+        const img = document.createElement('img');
+        img.src = p.img;
+        img.style.maxWidth = "300px";
+        img.style.display = "block";
+        img.style.marginTop = "8px";
+        postDiv.appendChild(img);
+      }
 
-        // text with admin badge (escaped)
-        const pEl = document.createElement('p');
-        if(p.role === 'admin'){
-          const badge = document.createElement('strong'); badge.style.color='red'; badge.textContent='[Admin] ';
-          pEl.appendChild(badge);
-        }
-        pEl.appendChild(document.createTextNode(esc(p.text)));
-        postDiv.appendChild(pEl);
+      // Add post video if exists
+      if (p.video) {
+        const video = document.createElement('video');
+        video.src = p.video;
+        video.controls = true;
+        video.style.maxWidth = "300px";
+        video.style.display = "block";
+        video.style.marginTop = "8px";
+        postDiv.appendChild(video);
+      }
 
-        // files (if any)
-        if(p.files && Array.isArray(p.files)){
-          p.files.forEach(url => {
-            const lower = url.split('?')[0].split('.').pop().toLowerCase();
-            if(['jpg','jpeg','png','gif','webp'].includes(lower)){
-              const img = document.createElement('img'); img.src = url; img.style.maxWidth='100%'; img.style.marginTop='6px'; img.alt='uploaded image';
-              postDiv.appendChild(img);
-            } else if(['mp4','webm','ogg'].includes(lower)){
-              const vid = document.createElement('video'); vid.controls = true; vid.style.maxWidth='100%'; vid.style.marginTop='6px';
-              const src = document.createElement('source'); src.src = url; vid.appendChild(src);
-              postDiv.appendChild(vid);
-            } else if(['mp3','wav','m4a','aac','ogg'].includes(lower)){
-              const audio = document.createElement('audio'); audio.controls = true; audio.style.marginTop='6px';
-              const src = document.createElement('source'); src.src = url; audio.appendChild(src);
-              postDiv.appendChild(audio);
-            } else {
-              const a = document.createElement('a'); a.href = url; a.target='_blank'; a.textContent = 'Download file'; a.style.display='block';
-              postDiv.appendChild(a);
-            }
-          });
-        }
-
+      postsDiv.appendChild(postDiv);
+    }
+  });
+}
         // timestamp
         const small = document.createElement('small'); small.textContent = 'Posted at: ' + esc(p.timestamp || '');
         postDiv.appendChild(small);
@@ -389,7 +446,5 @@ window.addEventListener('DOMContentLoaded', () => {
 </script>
 </body>
 </html>
-
-
 
 
