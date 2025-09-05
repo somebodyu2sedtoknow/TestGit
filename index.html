@@ -1,5 +1,7 @@
 <!DOCTYPE html>
+ <!-- Container where posts will be displayed -->
 <html lang="en">
+  <div id="posts-container" style="margin-top:20px;"></div>
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
@@ -235,7 +237,48 @@ window.createPost = function () {
   }
 };
 
+// function to display posts
+function displayPosts() {
+  const postsRef = firebase.database().ref('posts');
+  const container = document.getElementById('posts-container');
+  container.innerHTML = '';
 
+  postsRef.on('value', (snapshot) => {
+    container.innerHTML = '';
+    snapshot.forEach((childSnap) => {
+      const post = childSnap.val();
+
+      const postEl = document.createElement('div');
+      postEl.className = 'post';
+
+      // Add text
+      if (post.text) {
+        const p = document.createElement('p');
+        p.textContent = post.text;
+        postEl.appendChild(p);
+      }
+
+      // Add image if URL exists
+      if (post.img) {
+        const img = document.createElement('img');
+        img.src = post.img; // the URL from your input
+        img.style.maxWidth = '100%';
+        img.alt = 'Post image';
+        postEl.appendChild(img);
+      }
+
+      // Add time
+      const time = document.createElement('small');
+      time.textContent = post.time;
+      postEl.appendChild(time);
+
+      container.appendChild(postEl);
+    });
+  });
+}
+
+// call it once to load posts
+displayPosts();
 
     alert('Post created ✅');
   } catch(err){
@@ -404,9 +447,5 @@ window.addEventListener('DOMContentLoaded', () => {
 </script>
 </body>
 </html>
-
-
-
-
 
 
