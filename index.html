@@ -1,49 +1,115 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>SWIL</title>
 <style>
+* { margin:0; padding:0; box-sizing:border-box; }
 body {
   font-family: Arial, sans-serif;
   background: url('https://i.pinimg.com/736x/68/aa/c8/68aac8479ce6bd16304fda727f9c2486.jpg') no-repeat center center fixed;
   background-size: cover;
+  color: black;
+  cursor: url('https://25.media.tumblr.com/9b61ee90f1461f2459513f123e961ddf/tumblr_mvrnn6xt151sjkr6no1_500.gif'), auto;
+  overflow-x: hidden;
+  position: relative;
 }
-#posts { max-width: 800px; margin: 20px auto; }
-.post, .comment { background: rgba(255,255,255,0.9); padding: 10px; border-radius: 8px; margin: 10px 0; }
-.comment.admin-header { font-weight: bold; color: red; }
+#body-overlay {
+  position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+  background: url('https://64.media.tumblr.com/8871518c1f104c9cede189ba8a041913/tumblr_n02trm8qkq1svwlszo1_r1_500.gif') no-repeat center center;
+  background-size: cover;
+  pointer-events: none;
+  z-index: 0;
+}
+#top-banner {
+  position: fixed; top: 0; left: 50%; transform: translateX(-50%);
+  width: 100%; max-width: 600px; z-index: 1;
+}
+h1, h2 { position: relative; z-index: 2; }
+h1 { text-align: center; font-size: 5em; color: black; -webkit-text-stroke: 2px red; margin-top: 150px; }
+h2 { text-align: center; font-size: 1.2em; margin-bottom: 50px; color: black; -webkit-text-stroke: 1px red; }
+#side-left, #side-right {
+  position: fixed; top:0; width: 80px; height: 100%;
+  background: url('https://media4.giphy.com/media/10a8AOSeP6Rqfu/200w.gif') repeat-y;
+  background-size: 80px auto; z-index: 2;
+}
+#side-left { left:0; } #side-right { right:0; }
+#big-left, #big-right {
+  position: fixed; top: 0; width: 100px; height: 100%;
+  background: url('https://64.media.tumblr.com/a33b974be0ceb710cad1e2d90852ea7f/6fefe7acdbd459ca-79/s250x400/67d4aca6996622af3a2998bb085fe2982567a931.gif') no-repeat center center;
+  background-size: contain; z-index: 1;
+}
+#big-left { left: 90px; }
+#big-right { right: 90px; }
+#corner-dog { position: fixed; bottom: 20px; left: 20px; width: 80px; z-index: 10; }
+#bottom-gif { position: fixed; bottom: 0; right: 50%; transform: translateX(50%); width: 150px; z-index: 5; }
+#login-section, #post-section {
+  width: 80%; max-width: 800px; margin: auto;
+  background: rgba(255,255,255,0.8); padding: 20px; border-radius: 10px;
+  margin-bottom: 30px; position: relative; z-index: 2;
+}
+#posts { margin: 20px auto; width: 80%; max-width: 800px; position: relative; z-index:2; }
+.post, .comment { background: rgba(255,255,255,0.9); margin: 10px 0; padding: 10px; border-radius: 8px; }
+.post small { display: block; font-size: 0.8em; color: gray; margin-top: 5px; }
+.comment.admin-header {
+  font-weight: bold;
+  color: black;
+  -webkit-text-stroke-width: 1.2px;
+  -webkit-text-stroke-color: red;
+  text-shadow: 2px 0 red, -2px 0 red, 0 2px red, 0 -2px red;
+  margin-bottom: 5px;
+}
+.comment > div { margin-top: 5px; }
+input, textarea, select { width: 100%; margin: 5px 0; padding: 5px; }
+button { padding: 5px 10px; margin-top: 5px; cursor: pointer; }
+#password-div { margin-top: 10px;}
 </style>
 </head>
 <body>
+<div id="body-overlay"></div>
+<img id="top-banner" src="https://media.tenor.com/lu7ZRQm96x0AAAAi/heart-banner-kawaii.gif" />
+<div id="side-left"></div>
+<div id="side-right"></div>
+<div id="big-left"></div>
+<div id="big-right"></div>
+<img id="corner-dog" src="https://i.gzn.jp/img/2022/02/22/fastest-gif-animation/dancing-dog-2.gif" />
+<img id="bottom-gif" src="https://platform.vox.com/wp-content/uploads/sites/2/chorus/uploads/chorus_asset/file/8688491/hiE5vMs.gif" />
 <h1>SWIL</h1>
 <h2>Sharing - What - I - Like</h2>
 
+<!-- LOGIN -->
 <div id="login-section">
+  <label>Select Role:</label>
   <select id="role-select" onchange="togglePasswordField()">
     <option value="guest">Guest</option>
     <option value="admin">Admin</option>
   </select>
   <div id="password-div" style="display:none;">
-    <input type="password" id="admin-password" placeholder="Admin password">
+    <input type="password" id="admin-password" placeholder="Enter admin password" />
   </div>
   <button onclick="login()">Login</button>
-  <div id="role-status">Role: guest</div>
+  <p id="role-status">Role: guest</p>
 </div>
 
+<!-- ADMIN POST CREATION -->
 <div id="post-section" style="display:none;">
-  <textarea id="post-text" placeholder="Write a post..."></textarea>
-  <input type="file" id="post-file">
+  <h3>Create a Post</h3>
+  <textarea id="post-text" placeholder="Write something..."></textarea>
+  <input type="file" id="post-file" accept="image/*,video/*,gif" />
   <button onclick="createPost()">Post</button>
 </div>
 
+<!-- POSTS -->
 <div id="posts"></div>
 
+<!-- Firebase -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js";
 import { getDatabase, ref, push, set, onValue } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-database.js";
 import { getStorage, ref as sRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-storage.js";
 
+// 🔑 Your Firebase config
 const firebaseConfig = {
   apiKey: "AIzaSyAzZWzC7n-XKAdlCLrGM3TPDl9Uo5rUKzY",
   authDomain: "swil-eb81a.firebaseapp.com",
@@ -60,18 +126,17 @@ const storage = getStorage(app);
 
 let role = "guest";
 
-// Toggle Password Input
+// Toggle password field
 function togglePasswordField() {
   const selectedRole = document.getElementById("role-select").value;
-  document.getElementById("password-div").style.display =
-    selectedRole === "admin" ? "block" : "none";
+  document.getElementById("password-div").style.display = (selectedRole === "admin") ? "block" : "none";
 }
+window.togglePasswordField = togglePasswordField;
 
-// Login Function
+// Login
 function login() {
   const selectedRole = document.getElementById("role-select").value;
   const password = document.getElementById("admin-password").value;
-
   if (selectedRole === "admin" && password === "didifuckingstutter") {
     role = "admin";
     document.getElementById("post-section").style.display = "block";
@@ -81,21 +146,98 @@ function login() {
     document.getElementById("post-section").style.display = "none";
     alert("👤 Logged in as Guest");
   }
-
   document.getElementById("role-status").innerText = "Role: " + role;
 }
-
-// 🔑 Expose to global so HTML buttons can call them
-window.togglePasswordField = togglePasswordField;
 window.login = login;
 
-
-window.createPost = async function() {
+// Create Post
+async function createPost() {
   if (role !== "admin") return;
   const text = document.getElementById("post-text").value.trim();
-  const file = document.getElementById("post-file").files[0];
-  let fileUrl = "";
+  const fileInput = document.getElementById("post-file");
+  if (!text && fileInput.files.length === 0) return;
 
-  if (file) {
-    const fileRef = sRef(
+  let fileURL = null;
+  if (fileInput.files.length > 0) {
+    const file = fileInput.files[0];
+    const storageRef = sRef(storage, "uploads/" + file.name);
+    await uploadBytes(storageRef, file);
+    fileURL = await getDownloadURL(storageRef);
+  }
 
+  const newPost = push(ref(db, "posts"));
+  await set(newPost, {
+    text,
+    fileURL,
+    role,
+    timestamp: new Date().toLocaleString()
+  });
+
+  document.getElementById("post-text").value = "";
+  fileInput.value = "";
+}
+window.createPost = createPost;
+
+// Load Posts + Comments
+function loadPosts() {
+  const postsDiv = document.getElementById("posts");
+  const postsRef = ref(db, "posts");
+  onValue(postsRef, (snapshot) => {
+    postsDiv.innerHTML = "";
+    const data = snapshot.val();
+    if (!data) return;
+    Object.keys(data).reverse().forEach(postId => {
+      const post = data[postId];
+      const postDiv = document.createElement("div");
+      postDiv.className = "post";
+      postDiv.innerHTML = `
+        <p>${post.role === "admin" ? "<b style='color:red'>[Admin]</b> " : ""}${post.text || ""}</p>
+        ${post.fileURL ? `<img src="${post.fileURL}" style="max-width:100%;margin-top:5px;">` : ""}
+        <small>Posted at: ${post.timestamp}</small>
+        <div class="comments"></div>
+        <textarea placeholder="Add a comment"></textarea>
+        <button>Comment</button>
+      `;
+      postsDiv.appendChild(postDiv);
+
+      const commentsDiv = postDiv.querySelector(".comments");
+      const commentsRef = ref(db, "posts/" + postId + "/comments");
+      onValue(commentsRef, (snap) => {
+        commentsDiv.innerHTML = "";
+        const comments = snap.val();
+        if (!comments) return;
+        Object.keys(comments).forEach(cId => {
+          const c = comments[cId];
+          const cDiv = document.createElement("div");
+          cDiv.className = "comment";
+          if (c.role === "admin") {
+            const header = document.createElement("div");
+            header.className = "admin-header";
+            header.innerText = "Admin";
+            cDiv.appendChild(header);
+          }
+          const t = document.createElement("div");
+          t.innerText = c.text;
+          cDiv.appendChild(t);
+          commentsDiv.appendChild(cDiv);
+        });
+      });
+
+      // Add comment button
+      postDiv.querySelector("button").onclick = () => {
+        const textarea = postDiv.querySelector("textarea");
+        const commentText = textarea.value.trim();
+        if (!commentText) return;
+        push(ref(db, "posts/" + postId + "/comments"), {
+          text: commentText,
+          role
+        });
+        textarea.value = "";
+      };
+    });
+  });
+}
+loadPosts();
+</script>
+</body>
+</html>
