@@ -125,6 +125,7 @@ button { padding: 5px 10px; margin-top: 5px; cursor: pointer; }
 <audio id="fart-sound" src="https://www.soundjay.com/human/fart-01.mp3"></audio>
 <audio id="dog-bark" src="https://www.soundjay.com/dog/dog-bark-1.mp3"></audio>
 
+
 <script type="module">
   // Import Firebase
   import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js";
@@ -132,15 +133,15 @@ button { padding: 5px 10px; margin-top: 5px; cursor: pointer; }
 
   // Firebase Config
   const firebaseConfig = {
-  apiKey: "AIzaSyAzZWzC7n-XKAdlCLrGM3TPDl9Uo5rUKzY",
-  authDomain: "swil-eb81a.firebaseapp.com",
-  databaseURL: "https://swil-eb81a-default-rtdb.firebaseio.com",
-  projectId: "swil-eb81a",
-  storageBucket: "swil-eb81a.firebasestorage.app",
-  messagingSenderId: "964324457027",
-  appId: "1:964324457027:web:9c1e7f6331a8c59b52f2f6",
-  measurementId: "G-TXP1TJTDD0"
-};
+    apiKey: "AIzaSyAzZWzC7n-XKAdlCLrGM3TPDl9Uo5rUKzY",
+    authDomain: "swil-eb81a.firebaseapp.com",
+    databaseURL: "https://swil-eb81a-default-rtdb.firebaseio.com",
+    projectId: "swil-eb81a",
+    storageBucket: "swil-eb81a.firebasestorage.app",
+    messagingSenderId: "964324457027",
+    appId: "1:964324457027:web:9c1e7f6331a8c59b52f2f6",
+    measurementId: "G-TXP1TJTDD0"
+  };
 
   // Init
   const app = initializeApp(firebaseConfig);
@@ -148,26 +149,32 @@ button { padding: 5px 10px; margin-top: 5px; cursor: pointer; }
 
   let role = "guest";
 
-  // Login Function
-  function login() {
-    const selectedRole = document.getElementById('role-select').value;
-    const password = document.getElementById('admin-password').value;
-    const postSection = document.getElementById('post-section');
+  // Toggle Password Input
+  window.togglePasswordField = function () {
+    const selectedRole = document.getElementById("role-select").value;
+    document.getElementById("password-div").style.display =
+      selectedRole === "admin" ? "block" : "none";
+  };
 
-    if (selectedRole === 'admin' && password === 'didifuckingstutter') {
+  // Login Function
+  window.login = function () {
+    const selectedRole = document.getElementById("role-select").value;
+    const password = document.getElementById("admin-password").value;
+    const postSection = document.getElementById("post-section");
+
+    if (selectedRole === "admin" && password === "didifuckingstutter") {
       role = "admin";
-      alert("Logged in as Admin ✅");
+      alert("✅ Logged in as Admin");
       postSection.style.display = "block";
     } else {
       role = "guest";
-      alert("Logged in as Guest 👤");
+      alert("👤 Logged in as Guest");
       postSection.style.display = "none";
     }
-  }
-  window.login = login;
+  };
 
   // Create Post
-  function createPost() {
+  window.createPost = function () {
     if (role !== "admin") return;
 
     const text = document.getElementById("post-text").value.trim();
@@ -178,12 +185,12 @@ button { padding: 5px 10px; margin-top: 5px; cursor: pointer; }
 
     set(newPost, {
       text: text,
-      timestamp: new Date().toLocaleString()
+      timestamp: new Date().toLocaleString(),
+      role: role
     });
 
     document.getElementById("post-text").value = "";
-  }
-  window.createPost = createPost;
+  };
 
   // Load Posts
   function loadPosts() {
@@ -195,12 +202,15 @@ button { padding: 5px 10px; margin-top: 5px; cursor: pointer; }
       const data = snapshot.val();
       if (!data) return;
 
-      Object.keys(data).reverse().forEach(postId => {
+      Object.keys(data).reverse().forEach((postId) => {
         const post = data[postId];
         const postDiv = document.createElement("div");
         postDiv.className = "post";
+
+        const badge = post.role === "admin" ? "<strong style='color:red'>[Admin]</strong> " : "";
+
         postDiv.innerHTML = `
-          <p>${post.text}</p>
+          <p>${badge}${post.text}</p>
           <small>Posted at: ${post.timestamp}</small>
         `;
         postsDiv.appendChild(postDiv);
@@ -210,8 +220,10 @@ button { padding: 5px 10px; margin-top: 5px; cursor: pointer; }
   loadPosts();
 </script>
 
+
 </body>
 </html>
+
 
 
 
