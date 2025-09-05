@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>SWIL</title>
 <style>
 * { margin:0; padding:0; box-sizing:border-box; }
@@ -80,6 +80,12 @@ button { padding: 5px 10px; margin-top: 5px; cursor: pointer; }
 }
 #music-player input { width: 100%; }
 </style>
+
+<!-- Firebase SDKs -->
+<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-analytics.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database.js"></script>
+
 </head>
 <body>
 <div id="body-overlay"></div>
@@ -118,8 +124,24 @@ button { padding: 5px 10px; margin-top: 5px; cursor: pointer; }
 </div>
 <audio id="fart-sound" src="https://www.soundjay.com/human/fart-01.mp3"></audio>
 <audio id="dog-bark" src="https://www.soundjay.com/dog/dog-bark-1.mp3"></audio>
+
 <script>
 let role = "guest";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyD6rZ87Jbmf9G0j4fjvLgKRudyi67MmYTw",
+  authDomain: "for-website-41f5f.firebaseapp.com",
+  databaseURL: "https://for-website-41f5f-default-rtdb.firebaseio.com",
+  projectId: "for-website-41f5f",
+  storageBucket: "for-website-41f5f.firebasestorage.app",
+  messagingSenderId: "1021517463581",
+  appId: "1:1021517463581:web:f92076e5460274a6a4c6f4",
+  measurementId: "G-19172RJ3WJ"
+};
+
+const app = firebase.initializeApp(firebaseConfig);
+const analytics = firebase.analytics();
+const db = firebase.database();
 
 function togglePasswordField() {
   const selectedRole = document.getElementById('role-select').value;
@@ -151,98 +173,92 @@ function login() {
     alert('Logged in as guest.');
     postSection.style.display = 'none';
   }
-
   loadPosts();
-}
-
-function savePosts() {
-  const postsContent = document.getElementById('posts').innerHTML;
-  localStorage.setItem('posts', postsContent);
-}
-
-function loadPosts() {
-  const saved = localStorage.getItem('posts');
-  if (saved) {
-    document.getElementById('posts').innerHTML = saved;
-    bindCommentButtons();
-  } else {
-    document.getElementById('posts').innerHTML = '';
-  }
-}
-
-function bindCommentButtons() {
-  const buttons = document.querySelectorAll('#posts button');
-  buttons.forEach(btn => {
-    btn.onclick = function() {
-      addComment(this);
-    };
-  });
 }
 
 function createPost() {
   if (role !== 'admin') return;
   const text = document.getElementById('post-text').value.trim();
   if (!text) return;
-  const files = document.getElementById('post-file').files;
-  const postDiv = document.createElement('div');
-  postDiv.className = 'post';
-  postDiv.innerHTML = `<p>${text}</p><small>Posted at: ${getFormattedTime()}</small>`;
 
-  for (let i = 0; i < files.length; i++) {
-    const file = files[i];
-    const reader = new FileReader();
-    reader.onload = function(e) {
-      if (file.type.startsWith('image/') || file.type === 'image/gif') {
-        const img = document.createElement('img');
-        img.src = e.target.result;
-        img.style.maxWidth = '100%';
-        postDiv.appendChild(img);
-      } else if (file.type.startsWith('video/')) {
-        const vid = document.createElement('video');
-        vid.src = e.target.result;
-        vid.controls = true;
-        vid.style.maxWidth = '100%';
-        postDiv.appendChild(vid);
-      }
-      savePosts();
-    };
-    reader.readAsDataURL(file);
-  }
+  const newPostRef = db.ref('posts').push();
+  const timestamp = new Date().toLocaleString();
 
-  const commentDiv = document.createElement('div');
-  commentDiv.innerHTML = `
-    <textarea placeholder="Add comment"></textarea>
-    <button>Comment</button>
-  `;
-  postDiv.appendChild(commentDiv);
-  document.getElementById('posts').prepend(postDiv);
-  document.getElementById('post-text').value = '';
-  document.getElementById('post-file').value = '';
-  savePosts();
-  bindCommentButtons();
+  newPostRef.set({
+    text: text,
+    timestamp: timestamp,
+  }).then(() => {
+    document.getElementById('post-text').value = '';
+    document.getElementById('post-file').value = '';
+  }).catch(console.error);
 }
 
-function addComment(btn) {
-  const commentText = btn.previousElementSibling.value.trim();
-  if (!commentText) return;
+function loadPosts() {
+  const postsDiv = document.getElementById('posts');
+  db.ref('posts').on('value', snapshot => {
+    const posts = snapshot.val();
+    postsDiv.innerHTML = '';
+    if (!posts) return;
 
-  const commentDiv = document.createElement('div');
-  commentDiv.className = 'comment';
+    Object.keys(posts).reverse().forEach(postId => {
+      const post = posts[postId];
+      const postDiv = document.createElement('div');
+      postDiv.className = 'post';
+      postDiv.setAttribute('data-post-id', postId);
 
-  if (role === 'admin') {
-    const header = document.createElement('div');
-    header.className = 'admin-header';
-    header.innerText = 'Admin';
-    commentDiv.appendChild(header);
-  }
+      postDiv.innerHTML = `
+        <p>${post.text}</p>
+        <small>Posted at: ${post.timestamp}</small>
+        <div class="comments"></div>
+        <textarea placeholder="Add comment"></textarea>
+        <button>Add Comment</button>
+      `;
 
-  const textNode = document.createElement('div');
-  textNode.innerText = commentText;
-  commentDiv.appendChild(textNode);
+      postsDiv.appendChild(postDiv);
 
-  btn.parentElement.parentElement.insertBefore(commentDiv, btn.parentElement);
-  btn.previousElementSibling.value = '';
-  savePosts();
+      loadComments(postId, postDiv.querySelector('.comments'));
+
+      postDiv.querySelector('button').onclick = function () {
+        const textarea = postDiv.querySelector('textarea');
+        const commentText = textarea.value.trim();
+        if (!commentText) return;
+
+        db.ref(`posts/${postId}/comments`).push({
+          text: commentText,
+          role: role
+        });
+
+        textarea.value = '';
+      };
+    });
+  });
+}
+
+function loadComments(postId, commentsContainer) {
+  db.ref(`posts/${postId}/comments`).on('value', snapshot => {
+    const comments = snapshot.val();
+    commentsContainer.innerHTML = '';
+    if (!comments) return;
+
+    Object.keys(comments).forEach(commentId => {
+      const comment = comments[commentId];
+      const commentDiv = document.createElement('div');
+      commentDiv.className = 'comment';
+
+      if (comment.role === 'admin') {
+        const header = document.createElement('div');
+        header.className = 'admin-header';
+        header.innerText = 'Admin';
+        commentDiv.appendChild(header);
+      }
+
+      const textNode = document.createElement('div');
+      textNode.innerText = comment.text;
+      commentDiv.appendChild(textNode);
+
+      commentsContainer.appendChild(commentDiv);
+    });
+  });
 }
 
 function createFlyingGif() {
@@ -285,5 +301,6 @@ window.onload = () => {
   loadPosts();
 };
 </script>
+
 </body>
 </html>
