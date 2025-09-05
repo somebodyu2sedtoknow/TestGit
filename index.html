@@ -1,76 +1,104 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>SWIL</title>
 <style>
-body {
-  font-family: Arial, sans-serif;
-  background: url('https://i.pinimg.com/736x/68/aa/c8/68aac8479ce6bd16304fda727f9c2486.jpg') no-repeat center center fixed;
-  background-size: cover;
-  overflow-x: hidden;
-  position: relative;
-}
-#post-section, #login-section {
-  width: 80%; max-width: 800px; margin: 20px auto;
-  background: rgba(255,255,255,0.8); padding: 15px; border-radius: 10px;
-}
-.post, .comment {
-  background: rgba(255,255,255,0.9); margin: 10px 0; padding: 10px; border-radius: 8px;
-}
-#music-player {
-  position: fixed; bottom: 20px; right: 20px;
-  background: rgba(255,255,255,0.9);
-  padding: 10px; border-radius: 8px; width: 250px;
-  z-index: 1000;
-}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:Arial, sans-serif; background:url('https://i.pinimg.com/736x/68/aa/c8/68aac8479ce6bd16304fda727f9c2486.jpg') center/cover fixed; color:#000; min-height:100vh; overflow-x:hidden;}
+  #body-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:url('https://64.media.tumblr.com/8871518c1f104c9cede189ba8a041913/tumblr_n02trm8qkq1svwlszo1_r1_500.gif') no-repeat center/cover;pointer-events:none;z-index:0}
+  #top-banner{position:fixed;top:0;left:50%;transform:translateX(-50%);width:100%;max-width:600px;z-index:2}
+  h1{font-size:4.5rem;text-align:center;margin-top:140px;color:black;-webkit-text-stroke:2px red;z-index:2;position:relative}
+  h2{text-align:center;margin-bottom:30px;color:black;-webkit-text-stroke:1px red;position:relative;z-index:2}
+
+  /* side decorations */
+  #side-left,#side-right{position:fixed;top:0;width:80px;height:100%;background:url('https://media4.giphy.com/media/10a8AOSeP6Rqfu/200w.gif') repeat-y;background-size:80px auto;z-index:2}
+  #side-left{left:0}#side-right{right:0}
+  #big-left,#big-right{position:fixed;top:0;width:100px;height:100%;background:url('https://64.media.tumblr.com/a33b974be0ceb710cad1e2d90852ea7f/6fefe7acdbd459ca-79/s250x400/67d4aca6996622af3a2998bb085fe2982567a931.gif') no-repeat center center;background-size:contain;z-index:1}
+  #big-left{left:90px}#big-right{right:90px}
+  #corner-dog{position:fixed;bottom:20px;left:20px;width:80px;z-index:10}
+  #bottom-gif{position:fixed;bottom:0;right:50%;transform:translateX(50%);width:150px;z-index:5}
+
+  /* UI boxes */
+  #login-section,#post-section{width:90%;max-width:820px;margin:12px auto;background:rgba(255,255,255,0.9);padding:14px;border-radius:10px;position:relative;z-index:3}
+  #posts{width:90%;max-width:820px;margin:12px auto 160px auto;position:relative;z-index:3}
+  .post,.comment{background:rgba(255,255,255,0.98);padding:10px;border-radius:8px;margin:10px 0}
+  .post small{display:block;color:#666;margin-top:8px;font-size:0.9rem}
+  .comment .admin-header{font-weight:bold;color:black;text-shadow:2px 0 red,-2px 0 red,0 2px red,0 -2px red;margin-bottom:6px}
+  textarea{width:100%;min-height:60px;padding:8px;border-radius:6px;border:1px solid #ccc}
+  input[type=file]{width:100%}
+  button{padding:7px 10px;border-radius:6px;border:0;background:#222;color:#fff;cursor:pointer}
+  #music-player{position:fixed;bottom:20px;right:20px;background:rgba(255,255,255,0.95);padding:10px;border-radius:8px;width:260px;z-index:999}
+  #debug{position:fixed;right:10px;bottom:10px;max-width:420px;background:rgba(0,0,0,0.72);color:#fff;padding:8px;border-radius:8px;z-index:9999;font-size:0.85rem;overflow:auto;max-height:220px}
+  .debug-error{color:#ff9b9b}
+  .static-fallback{width:90%;max-width:820px;margin:12px auto;position:relative;z-index:3}
 </style>
 </head>
 <body>
-<h1 style="text-align:center;">SWIL</h1>
-<h2 style="text-align:center;">Sharing - What - I - Like</h2>
 
-<!-- Login -->
+<div id="body-overlay"></div>
+<img id="top-banner" src="https://media.tenor.com/lu7ZRQm96x0AAAAi/heart-banner-kawaii.gif" alt="banner" />
+<div id="side-left"></div><div id="side-right"></div>
+<div id="big-left"></div><div id="big-right"></div>
+<img id="corner-dog" src="https://i.gzn.jp/img/2022/02/22/fastest-gif-animation/dancing-dog-2.gif" alt="dog" />
+<img id="bottom-gif" src="https://platform.vox.com/wp-content/uploads/sites/2/chorus/uploads/chorus_asset/file/8688491/hiE5vMs.gif" alt="bottom" />
+
+<h1>SWIL</h1>
+<h2>Sharing - What - I - Like</h2>
+
+<!-- LOGIN -->
 <div id="login-section">
-  <label>Select Role:</label>
+  <label for="role-select">Select Role:</label>
   <select id="role-select" onchange="togglePasswordField()">
     <option value="guest">Guest</option>
     <option value="admin">Admin</option>
   </select>
-  <div id="password-div" style="display:none;">
-    <input type="password" id="admin-password" placeholder="Enter admin password" />
+  <div id="password-div" style="display:none;margin-top:8px;">
+    <input id="admin-password" type="password" placeholder="Admin password">
   </div>
-  <button onclick="login()">Login</button>
+  <div style="margin-top:8px;">
+    <button onclick="login()">Login</button>
+    <span id="role-status" style="margin-left:12px;font-weight:600">Role: guest</span>
+  </div>
 </div>
 
-<!-- Post Section -->
+<!-- POST (admin only) -->
 <div id="post-section" style="display:none;">
   <h3>Create a Post</h3>
-  <textarea id="post-text" placeholder="Text"></textarea>
-  <input type="file" id="post-file" multiple />
-  <button onclick="createPost()">Post</button>
+  <textarea id="post-text" placeholder="Write something..."></textarea>
+  <div style="margin-top:8px;"><input id="post-file" type="file" multiple accept="image/*,video/*,audio/*"></div>
+  <div style="margin-top:8px"><button onclick="createPost()">Post</button></div>
 </div>
 
-<!-- Posts -->
+<!-- fallback -->
+<div id="static-fallback" class="static-fallback">
+  <div class="post"><p><strong>[Admin]</strong> Static fallback post — visible if DB unreadable.</p><small>Fallback: visible when DB fails</small></div>
+</div>
+
+<!-- POSTS -->
 <div id="posts"></div>
 
-<!-- Music Player -->
+<!-- Music player -->
 <div id="music-player">
-  <input type="text" id="music-url" placeholder="YouTube URL" />
-  <button onclick="playMusic()">Play</button>
-  <div id="music-container"></div>
+  <input id="music-url" type="text" placeholder="YouTube URL" style="width:100%;padding:6px;border-radius:6px;border:1px solid #ccc" />
+  <div style="margin-top:6px"><button onclick="playMusic()">Play</button></div>
+  <div id="music-container" style="margin-top:8px"></div>
 </div>
 
-<!-- Fart Sound -->
-<audio id="fart-sound" src="https://www.soundjay.com/human/fart-01.mp3"></audio>
+<!-- Fart sound -->
+<audio id="fart-sound" src="https://www.soundjay.com/human/fart-01.mp3" preload="auto"></audio>
 
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js";
-import { getDatabase, ref, push, set, onValue } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-database.js";
-import { getStorage, ref as sRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-storage.js";
+<!-- Debug box -->
+<div id="debug" aria-live="polite"></div>
 
-// Firebase Config
+<!-- Firebase compat libs (non-module so functions remain global) -->
+<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-storage-compat.js"></script>
+
+<script>
+/* --------- CONFIG (your project) ---------- */
 const firebaseConfig = {
   apiKey: "AIzaSyAzZWzC7n-XKAdlCLrGM3TPDl9Uo5rUKzY",
   authDomain: "swil-eb81a.firebaseapp.com",
@@ -80,165 +108,265 @@ const firebaseConfig = {
   messagingSenderId: "964324457027",
   appId: "1:964324457027:web:9c1e7f6331a8c59b52f2f6"
 };
+/* ----------------------------------------- */
 
-const app = initializeApp(firebaseConfig);
-const db = getDatabase(app);
-const storage = getStorage(app);
-
-let role = "guest";
-
-// Toggle password field
-function togglePasswordField() {
-  const selectedRole = document.getElementById("role-select").value;
-  document.getElementById("password-div").style.display =
-    selectedRole === "admin" ? "block" : "none";
+function logDebug(msg, isError=false){
+  const d = document.getElementById('debug');
+  const el = document.createElement('div');
+  if(isError) el.className = 'debug-error';
+  el.textContent = `${new Date().toLocaleTimeString()} — ${msg}`;
+  d.prepend(el);
+  console[isError ? 'error' : 'log'](msg);
 }
-window.togglePasswordField = togglePasswordField;
 
-// Login
-function login() {
-  const selectedRole = document.getElementById("role-select").value;
-  const password = document.getElementById("admin-password").value;
-
-  if (selectedRole === "admin" && password === "didifuckingstutter") {
-    role = "admin";
-    document.getElementById("post-section").style.display = "block";
-    alert("✅ Logged in as Admin");
-  } else {
-    role = "guest";
-    document.getElementById("post-section").style.display = "none";
-    alert("👤 Logged in as Guest");
-  }
+try {
+  firebase.initializeApp(firebaseConfig);
+} catch(e){
+  logDebug('Firebase init failed: ' + (e.message||e), true);
 }
-window.login = login;
 
-// Create Post
-async function createPost() {
-  if (role !== "admin") return;
+const db = firebase.database();
+const storage = firebase.storage();
+let role = 'guest';
 
-  const text = document.getElementById("post-text").value.trim();
-  const fileInput = document.getElementById("post-file");
-  const timestamp = new Date().toLocaleString();
+/* expose toggle so select onchange works */
+window.togglePasswordField = function(){
+  try {
+    const sel = document.getElementById('role-select').value;
+    document.getElementById('password-div').style.display = sel === 'admin' ? 'block' : 'none';
+  } catch(e){ logDebug('toggle error: '+e.message, true); }
+};
 
-  let fileURLs = [];
+/* login */
+window.login = function(){
+  try {
+    const sel = document.getElementById('role-select').value;
+    const pass = document.getElementById('admin-password').value || '';
+    if(sel === 'admin' && pass === 'didifuckingstutter'){
+      role = 'admin';
+      document.getElementById('post-section').style.display = 'block';
+      alert('✅ Logged in as Admin');
+      logDebug('Logged in as admin');
+    } else {
+      role = 'guest';
+      document.getElementById('post-section').style.display = 'none';
+      alert('👤 Logged in as Guest');
+      logDebug('Logged in as guest');
+    }
+    document.getElementById('role-status').innerText = 'Role: ' + role;
+  } catch(e){ logDebug('login error: '+(e.message||e), true); alert('Login error — open debug box'); }
+};
 
-  for (let file of fileInput.files) {
-    const storageRef = sRef(storage, "uploads/" + Date.now() + "-" + file.name);
-    await uploadBytes(storageRef, file);
-    const url = await getDownloadURL(storageRef);
-    fileURLs.push(url);
-  }
+/* helper: unique filename */
+function uniqueName(name){
+  return Date.now() + '_' + Math.random().toString(36).slice(2,9) + '_' + name.replace(/\s+/g,'_');
+}
 
-  const postsRef = ref(db, "posts");
-  const newPost = push(postsRef);
-
-  await set(newPost, {
-    text,
-    timestamp,
-    files: fileURLs,
-    role
+/* upload array of files -> returns Promise(array of URLs) */
+function uploadFiles(files){
+  if(!files || files.length === 0) return Promise.resolve([]);
+  const arr = Array.from(files);
+  const promises = arr.map(file => {
+    const path = 'uploads/' + uniqueName(file.name);
+    const ref = storage.ref(path);
+    return ref.put(file).then(snapshot => snapshot.ref.getDownloadURL());
   });
-
-  document.getElementById("post-text").value = "";
-  fileInput.value = "";
+  return Promise.all(promises);
 }
-window.createPost = createPost;
 
-// Load Posts
-function loadPosts() {
-  const postsDiv = document.getElementById("posts");
-  const postsRef = ref(db, "posts");
+/* create post (admin only) */
+window.createPost = async function(){
+  try {
+    if(role !== 'admin'){ alert('Only admin can create posts'); return; }
+    const text = (document.getElementById('post-text').value || '').trim();
+    const fileInput = document.getElementById('post-file');
+    if(!text && (!fileInput || fileInput.files.length === 0)){ alert('Write text or choose file'); return; }
 
-  onValue(postsRef, (snapshot) => {
-    postsDiv.innerHTML = "";
-    const data = snapshot.val();
-    if (!data) return;
+    // upload files first
+    logDebug('Uploading files (if any)...');
+    const urls = await uploadFiles(fileInput.files);
+    logDebug('Uploaded files: ' + (urls.length ? urls.join(', ') : 'none'));
 
-    Object.keys(data).reverse().forEach(postId => {
-      const post = data[postId];
-      const postDiv = document.createElement("div");
-      postDiv.className = "post";
-
-      let filesHTML = "";
-      if (post.files) {
-        post.files.forEach(url => {
-          if (url.match(/\.(jpg|jpeg|png|gif)$/i)) {
-            filesHTML += `<img src="${url}" style="max-width:100%; margin-top:5px;" />`;
-          } else if (url.match(/\.(mp4|webm)$/i)) {
-            filesHTML += `<video controls style="max-width:100%; margin-top:5px;"><source src="${url}"></video>`;
-          } else if (url.match(/\.(mp3|wav)$/i)) {
-            filesHTML += `<audio controls style="margin-top:5px;"><source src="${url}"></audio>`;
-          }
-        });
-      }
-
-      postDiv.innerHTML = `
-        <p>${post.role === "admin" ? "<b style='color:red'>[Admin]</b> " : ""}${post.text}</p>
-        <small>Posted at: ${post.timestamp}</small>
-        ${filesHTML}
-        <div class="comments"></div>
-        <textarea placeholder="Add comment"></textarea>
-        <button>Add Comment</button>
-      `;
-      postsDiv.appendChild(postDiv);
-
-      const commentBox = postDiv.querySelector("textarea");
-      const commentBtn = postDiv.querySelector("button");
-      const commentsContainer = postDiv.querySelector(".comments");
-
-      commentBtn.onclick = () => {
-        if (!commentBox.value.trim()) return;
-        const commentRef = ref(db, `posts/${postId}/comments`);
-        push(commentRef, { text: commentBox.value, role });
-        commentBox.value = "";
-      };
-
-      // Load comments
-      onValue(ref(db, `posts/${postId}/comments`), (snap) => {
-        commentsContainer.innerHTML = "";
-        const comments = snap.val();
-        if (!comments) return;
-        Object.keys(comments).forEach(cid => {
-          const c = comments[cid];
-          const div = document.createElement("div");
-          div.className = "comment";
-          div.innerHTML = `${c.role === "admin" ? "<b style='color:red'>Admin:</b> " : ""}${c.text}`;
-          commentsContainer.appendChild(div);
-        });
-      });
+    const newRef = db.ref('posts').push();
+    await newRef.set({
+      text: text || '',
+      files: urls.length ? urls : null,
+      role: role,
+      timestamp: new Date().toLocaleString()
     });
+
+    // clear fields
+    document.getElementById('post-text').value = '';
+    if(fileInput) fileInput.value = '';
+
+    alert('Post created ✅');
+  } catch(err){
+    logDebug('createPost error: ' + (err && err.message ? err.message : err), true);
+    alert('Failed to create post — check debug box.');
+  }
+};
+
+/* add comment helper */
+function addComment(postId, text){
+  if(!text) return;
+  const cRef = db.ref('posts/' + postId + '/comments').push();
+  cRef.set({ text: text, role: role, timestamp: new Date().toLocaleString() })
+    .catch(e => { logDebug('addComment error: '+(e.message||e), true); });
+}
+
+/* escape text for safety */
+function esc(s){ return (s===null||s===undefined) ? '' : String(s); }
+
+/* render posts & comments live */
+function startListening(){
+  const postsDiv = document.getElementById('posts');
+  const fallback = document.getElementById('static-fallback');
+  const postsRef = db.ref('posts');
+
+  postsRef.on('value', snapshot => {
+    try {
+      const data = snapshot.val();
+      postsDiv.innerHTML = '';
+      if(!data){
+        fallback.style.display = 'block';
+        logDebug('No posts in DB yet.');
+        return;
+      }
+      fallback.style.display = 'none';
+
+      Object.keys(data).reverse().forEach(postId => {
+        const p = data[postId];
+        const postDiv = document.createElement('div'); postDiv.className = 'post';
+
+        // text with admin badge (escaped)
+        const pEl = document.createElement('p');
+        if(p.role === 'admin'){
+          const badge = document.createElement('strong'); badge.style.color='red'; badge.textContent='[Admin] ';
+          pEl.appendChild(badge);
+        }
+        pEl.appendChild(document.createTextNode(esc(p.text)));
+        postDiv.appendChild(pEl);
+
+        // files (if any)
+        if(p.files && Array.isArray(p.files)){
+          p.files.forEach(url => {
+            const lower = url.split('?')[0].split('.').pop().toLowerCase();
+            if(['jpg','jpeg','png','gif','webp'].includes(lower)){
+              const img = document.createElement('img'); img.src = url; img.style.maxWidth='100%'; img.style.marginTop='6px'; img.alt='uploaded image';
+              postDiv.appendChild(img);
+            } else if(['mp4','webm','ogg'].includes(lower)){
+              const vid = document.createElement('video'); vid.controls = true; vid.style.maxWidth='100%'; vid.style.marginTop='6px';
+              const src = document.createElement('source'); src.src = url; vid.appendChild(src);
+              postDiv.appendChild(vid);
+            } else if(['mp3','wav','m4a','aac','ogg'].includes(lower)){
+              const audio = document.createElement('audio'); audio.controls = true; audio.style.marginTop='6px';
+              const src = document.createElement('source'); src.src = url; audio.appendChild(src);
+              postDiv.appendChild(audio);
+            } else {
+              const a = document.createElement('a'); a.href = url; a.target='_blank'; a.textContent = 'Download file'; a.style.display='block';
+              postDiv.appendChild(a);
+            }
+          });
+        }
+
+        // timestamp
+        const small = document.createElement('small'); small.textContent = 'Posted at: ' + esc(p.timestamp || '');
+        postDiv.appendChild(small);
+
+        // comments container
+        const commentsDiv = document.createElement('div'); commentsDiv.className = 'comments'; commentsDiv.style.marginTop='8px';
+        postDiv.appendChild(commentsDiv);
+
+        // comment UI
+        const ta = document.createElement('textarea'); ta.placeholder = 'Add a comment'; ta.style.marginTop='8px';
+        postDiv.appendChild(ta);
+        const cBtn = document.createElement('div'); cBtn.style.marginTop='6px';
+        const btn = document.createElement('button'); btn.textContent = 'Comment';
+        cBtn.appendChild(btn);
+        postDiv.appendChild(cBtn);
+
+        // wire comment add
+        btn.addEventListener('click', () => {
+          const txt = (ta.value || '').trim();
+          if(!txt){ alert('Comment cannot be empty'); return; }
+          addComment(postId, txt);
+          ta.value = '';
+        });
+
+        // attach live comments listener
+        const comRef = db.ref('posts/' + postId + '/comments');
+        comRef.on('value', snap => {
+          commentsDiv.innerHTML = '';
+          const cs = snap.val();
+          if(!cs) return;
+          Object.keys(cs).forEach(cid => {
+            const c = cs[cid];
+            const cDiv = document.createElement('div'); cDiv.className = 'comment';
+            if(c.role === 'admin'){
+              const header = document.createElement('div'); header.className = 'admin-header'; header.innerText = 'Admin'; cDiv.appendChild(header);
+            }
+            const textNode = document.createElement('div'); textNode.innerText = esc(c.text || '');
+            cDiv.appendChild(textNode);
+            commentsDiv.appendChild(cDiv);
+          });
+        }, err => {
+          logDebug('Comment read error for ' + postId + ': ' + (err.message||err), true);
+        });
+
+        postsDiv.appendChild(postDiv);
+      });
+    } catch(e){
+      logDebug('render error: ' + (e.message||e), true);
+    }
+  }, err => {
+    logDebug('DB read failed: ' + (err && err.message ? err.message : err), true);
+    document.getElementById('static-fallback').style.display = 'block';
   });
 }
-loadPosts();
-window.loadPosts = loadPosts;
 
-// 🎵 Music Player
-function playMusic() {
-  const url = document.getElementById("music-url").value;
-  const match = url.match(/(?:youtube\.com.*v=|youtu\.be\/)([^&]+)/);
-  if (!match) return alert("Invalid YouTube URL");
-  const id = match[1];
-  document.getElementById("music-container").innerHTML =
-    `<iframe width="230" height="80" src="https://www.youtube.com/embed/${id}?autoplay=1" frameborder="0" allow="autoplay; encrypted-media"></iframe>`;
-}
-window.playMusic = playMusic;
+/* Music player (YouTube) */
+window.playMusic = function(){
+  try {
+    const url = document.getElementById('music-url').value.trim();
+    if(!url) return alert('Paste a YouTube URL');
+    const m = url.match(/(?:youtube\\.com.*v=|youtu\\.be\\/)([^&\\?/]+)/);
+    if(!m) return alert('Invalid YouTube URL');
+    const id = m[1];
+    document.getElementById('music-container').innerHTML = `<iframe width="230" height="80" src="https://www.youtube.com/embed/${id}?autoplay=1" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>`;
+  } catch(e){ logDebug('playMusic error: '+(e.message||e), true); }
+};
 
-// 🎇 Flying GIF every 2s
-function createFlyingGif() {
-  const gif = document.createElement("img");
-  gif.src = "https://images.squarespace-cdn.com/content/v1/63d184ab563ef27ae4e812ff/a9e680c6-c461-4ff4-a21a-277b00f453aa/Animation+Artist+-+Headexplodie+-+Totally+Reps+33.GIF";
-  gif.style.position = "absolute";
-  gif.style.width = "120px";
-  gif.style.left = Math.random() * (window.innerWidth - 150) + "px";
-  gif.style.top = Math.random() * (window.innerHeight - 150) + "px";
-  document.body.appendChild(gif);
-  setTimeout(() => gif.remove(), 5000);
+/* flying GIF every 2s */
+function createFlyingGif(){
+  try {
+    const gif = document.createElement('img');
+    gif.src = 'https://images.squarespace-cdn.com/content/v1/63d184ab563ef27ae4e812ff/a9e680c6-c461-4ff4-a21a-277b00f453aa/Animation+Artist+-+Headexplodie+-+Totally+Reps+33.GIF';
+    gif.style.position = 'absolute';
+    gif.style.width = '120px';
+    gif.style.zIndex = 9998;
+    gif.style.left = Math.random() * (window.innerWidth - 150) + 'px';
+    gif.style.top = Math.random() * (window.innerHeight - 150) + 'px';
+    document.body.appendChild(gif);
+    setTimeout(()=> gif.remove(), 5000);
+  } catch(e){ console.error(e); }
 }
 setInterval(createFlyingGif, 2000);
 
-// 💨 Fart sound on click
-document.addEventListener("click", () => {
-  document.getElementById("fart-sound").play();
+/* fart sound on click */
+document.addEventListener('click', () => {
+  try { document.getElementById('fart-sound').play().catch(()=>{}); } catch(e) {}
+});
+
+/* init on DOMContentLoaded */
+window.addEventListener('DOMContentLoaded', () => {
+  try {
+    document.getElementById('post-section').style.display = 'none';
+    document.getElementById('password-div').style.display = 'none';
+    document.getElementById('role-status').innerText = 'Role: guest';
+    document.getElementById('role-select').addEventListener('change', togglePasswordField);
+    startListening();
+    logDebug('App initialized and listening for posts...');
+  } catch(e){ logDebug('init error: ' + (e.message||e), true); }
 });
 </script>
 </body>
