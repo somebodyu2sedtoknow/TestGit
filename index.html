@@ -110,7 +110,6 @@ const firebaseConfig = {
   measurementId: "G-TXP1TJTDD0"
 };
 
-
 /* ----------------------------------------- */
 
 function logDebug(msg, isError=false){
@@ -123,26 +122,13 @@ function logDebug(msg, isError=false){
 }
 
 try {
-  firebase.initializeApp(firebaseConfig); console.log("Firebase initialized"); 
-  const firebaseConfig = {
-    apiKey: "AIzaSyAzZWzC7n-XKAdlCLrGM3TPDl9Uo5rUKzY",
-    authDomain: "swil-eb81a.firebaseapp.com",
-    databaseURL: "https://swil-eb81a-default-rtdb.asia-southeast1.firebasedatabase.app",
-    projectId: "swil-eb81a",
-    storageBucket: "swil-eb81a.appspot.com",
-    messagingSenderId: "964324457027",
-    appId: "1:964324457027:web:9c1e7f6331a8c59b52f2f6",
-    measurementId: "G-TXP1TJTDD0"
-  };
-
   // ✅ Initialize Firebase
-  const app = initializeApp(firebaseConfig);
+  firebase.initializeApp(firebaseConfig);
   console.log("Firebase initialized ✅");
 
   // ✅ Test DB read
-  const db = getDatabase(app);
-
-  get(child(ref(db), 'posts')).then((snapshot) => {
+  const dbTest = firebase.database().ref("posts");
+  dbTest.get().then((snapshot) => {
     if (snapshot.exists()) {
       console.log("✅ Posts from DB:", snapshot.val());
     } else {
@@ -151,12 +137,12 @@ try {
   }).catch((error) => {
     console.error("❌ DB read error:", error);
   });
-</script>
 
 } catch(e){
   logDebug('Firebase init failed: ' + (e.message||e), true);
 }
 
+// main DB + storage handles
 const db = firebase.database();
 const storage = firebase.storage();
 let role = 'guest';
@@ -361,7 +347,7 @@ window.playMusic = function(){
   try {
     const url = document.getElementById('music-url').value.trim();
     if(!url) return alert('Paste a YouTube URL');
-    const m = url.match(/(?:youtube\\.com.*v=|youtu\\.be\\/)([^&\\?/]+)/);
+    const m = url.match(/(?:youtube\.com.*v=|youtu\.be\/)([^&\?/]+)/);
     if(!m) return alert('Invalid YouTube URL');
     const id = m[1];
     document.getElementById('music-container').innerHTML = `<iframe width="230" height="80" src="https://www.youtube.com/embed/${id}?autoplay=1" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>`;
@@ -403,6 +389,7 @@ window.addEventListener('DOMContentLoaded', () => {
 </script>
 </body>
 </html>
+
 
 
 
