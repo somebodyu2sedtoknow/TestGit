@@ -60,25 +60,35 @@ const storage = getStorage(app);
 
 let role = "guest";
 
-window.togglePasswordField = function() {
+// Toggle Password Input
+function togglePasswordField() {
+  const selectedRole = document.getElementById("role-select").value;
   document.getElementById("password-div").style.display =
-    document.getElementById("role-select").value === "admin" ? "block" : "none";
-};
+    selectedRole === "admin" ? "block" : "none";
+}
 
-window.login = function() {
-  const sel = document.getElementById("role-select").value;
-  const pass = document.getElementById("admin-password").value;
-  if (sel === "admin" && pass === "didifuckingstutter") {
+// Login Function
+function login() {
+  const selectedRole = document.getElementById("role-select").value;
+  const password = document.getElementById("admin-password").value;
+
+  if (selectedRole === "admin" && password === "didifuckingstutter") {
     role = "admin";
     document.getElementById("post-section").style.display = "block";
-    alert("Logged in as Admin");
+    alert("✅ Logged in as Admin");
   } else {
     role = "guest";
     document.getElementById("post-section").style.display = "none";
-    alert("Logged in as Guest");
+    alert("👤 Logged in as Guest");
   }
+
   document.getElementById("role-status").innerText = "Role: " + role;
-};
+}
+
+// 🔑 Expose to global so HTML buttons can call them
+window.togglePasswordField = togglePasswordField;
+window.login = login;
+
 
 window.createPost = async function() {
   if (role !== "admin") return;
@@ -88,3 +98,4 @@ window.createPost = async function() {
 
   if (file) {
     const fileRef = sRef(
+
