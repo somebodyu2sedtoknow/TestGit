@@ -98,7 +98,6 @@ button { padding: 5px 10px; margin-top: 5px; cursor: pointer; }
 <img id="bottom-gif" src="https://platform.vox.com/wp-content/uploads/sites/2/chorus/uploads/chorus_asset/file/8688491/hiE5vMs.gif?quality=90&strip=all&crop=0,0,100,100" />
 <h1>SWIL</h1>
 <h2>Sharing - What - I - Like</h2>
-
 <div id="login-section">
   <label>Select Role:</label>
   <select id="role-select" onchange="togglePasswordField()">
@@ -110,36 +109,19 @@ button { padding: 5px 10px; margin-top: 5px; cursor: pointer; }
   </div>
   <button onclick="login()">Login</button>
 </div>
-
 <div id="post-section" style="display:none;">
   <h3>Create a Post</h3>
   <textarea id="post-text" placeholder="Text"></textarea>
   <input type="file" id="post-file" accept="image/*,video/*,gif" multiple />
   <button onclick="createPost()">Post</button>
 </div>
-
-<!-- Static hardcoded posts (always visible) -->
-<div id="static-posts">
-  <div class="post">
-    <p>Welcome to SWIL Blog 🎉</p>
-    <small>Posted by Admin</small>
-  </div>
-  <div class="post">
-    <p>This is a default post that’s always here.</p>
-    <small>Posted by System</small>
-  </div>
-</div>
-
-<!-- Firebase posts -->
 <div id="posts"></div>
-
 <!-- Music Player -->
 <div id="music-player">
   <input type="text" id="music-url" placeholder="YouTube URL" />
   <button onclick="playMusic()">Play</button>
   <div id="music-container"></div>
 </div>
-
 <audio id="fart-sound" src="https://www.soundjay.com/human/fart-01.mp3"></audio>
 <audio id="dog-bark" src="https://www.soundjay.com/dog/dog-bark-1.mp3"></audio>
 
@@ -167,45 +149,52 @@ function togglePasswordField() {
   passwordDiv.style.display = selectedRole === 'admin' ? 'block' : 'none';
 }
 
-function getFormattedTime() {
-  return new Date().toLocaleString();
-}
-
 function login() {
   const selectedRole = document.getElementById('role-select').value;
   const password = document.getElementById('admin-password').value;
   const postSection = document.getElementById('post-section');
 
-  if (selectedRole === 'admin' && password === 'didifuckingstutter') {
-    role = 'admin';
-    alert('Logged in as admin!');
-    postSection.style.display = 'block';
+  if (selectedRole === 'admin') {
+    if (password === 'didifuckingstutter') {
+      role = 'admin';
+      alert('Logged in as admin!');
+      postSection.style.display = 'block';
+    } else {
+      alert('Wrong password! Logged in as guest.');
+      role = 'guest';
+      postSection.style.display = 'none';
+    }
   } else {
     role = 'guest';
-    if (selectedRole === 'admin') {
-      alert('Wrong password! Logged in as guest.');
-    } else {
-      alert('Logged in as guest.');
-    }
+    alert('Logged in as guest.');
     postSection.style.display = 'none';
   }
+  loadPosts();
 }
 
 function createPost() {
-  if (role !== 'admin') return;
-  const text = document.getElementById('post-text').value.trim();
-  if (!text) return;
+  if (role !== 'admin') return;  // only admin can post
 
-  const newPostRef = db.ref('posts').push();
+  const text = document.getElementById('post-text').value.trim();
+  if (!text) {
+    alert("Post text cannot be empty!");
+    return;
+  }
+
   const timestamp = new Date().toLocaleString();
 
+  const newPostRef = db.ref('posts').push();
   newPostRef.set({
     text: text,
     timestamp: timestamp,
+    role: role
   }).then(() => {
     document.getElementById('post-text').value = '';
-    document.getElementById('post-file').value = '';
-  }).catch(console.error);
+    alert("Post created successfully!");
+  }).catch((err) => {
+    console.error("Error posting:", err);
+    alert("Failed to post. Check console for details.");
+  });
 }
 
 function loadPosts() {
@@ -219,10 +208,12 @@ function loadPosts() {
       const post = posts[postId];
       const postDiv = document.createElement('div');
       postDiv.className = 'post';
-      postDiv.setAttribute('data-post-id', postId);
+
+      // show admin badge if created by admin
+      const badge = post.role === 'admin' ? "<strong style='color:red'>[Admin]</strong> " : "";
 
       postDiv.innerHTML = `
-        <p>${post.text}</p>
+        <p>${badge}${post.text}</p>
         <small>Posted at: ${post.timestamp}</small>
         <div class="comments"></div>
         <textarea placeholder="Add comment"></textarea>
@@ -313,7 +304,6 @@ window.onload = () => {
   document.getElementById('password-div').style.display = 'none';
   document.getElementById('post-text').value = '';
   document.getElementById('admin-password').value = '';
-  // Always load posts globally
   loadPosts();
 };
 </script>
