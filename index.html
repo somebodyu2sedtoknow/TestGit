@@ -123,7 +123,39 @@ function logDebug(msg, isError=false){
 }
 
 try {
-  firebase.initializeApp(firebaseConfig);
+  firebase.initializeApp(firebaseConfig); console.log("Firebase initialized"); <script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+  import { getDatabase, ref, get, child } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyAzZWzC7n-XKAdlCLrGM3TPDl9Uo5rUKzY",
+    authDomain: "swil-eb81a.firebaseapp.com",
+    databaseURL: "https://swil-eb81a-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId: "swil-eb81a",
+    storageBucket: "swil-eb81a.appspot.com",
+    messagingSenderId: "964324457027",
+    appId: "1:964324457027:web:9c1e7f6331a8c59b52f2f6",
+    measurementId: "G-TXP1TJTDD0"
+  };
+
+  // ✅ Initialize Firebase
+  const app = initializeApp(firebaseConfig);
+  console.log("Firebase initialized ✅");
+
+  // ✅ Test DB read
+  const db = getDatabase(app);
+
+  get(child(ref(db), 'posts')).then((snapshot) => {
+    if (snapshot.exists()) {
+      console.log("✅ Posts from DB:", snapshot.val());
+    } else {
+      console.log("⚠️ No data available in posts");
+    }
+  }).catch((error) => {
+    console.error("❌ DB read error:", error);
+  });
+</script>
+
 } catch(e){
   logDebug('Firebase init failed: ' + (e.message||e), true);
 }
@@ -374,5 +406,6 @@ window.addEventListener('DOMContentLoaded', () => {
 </script>
 </body>
 </html>
+
 
 
