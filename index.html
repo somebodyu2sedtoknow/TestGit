@@ -3,6 +3,12 @@
 <html lang="en">
 <head>
 <meta charset="utf-8"/>
+ <meta http-equiv="Content-Security-Policy" 
+  content="default-src 'self' https://*.firebaseio.com https://*.gstatic.com https://*.googleapis.com https://www.gstatic.com https://firebasestorage.googleapis.com https://www.youtube.com https://i.pinimg.com https://media.tenor.com https://64.media.tumblr.com https://platform.vox.com https://images.squarespace-cdn.com data: blob:; 
+           script-src 'self' https://www.gstatic.com https://www.gstatic.com/firebasejs/ 'unsafe-inline'; 
+           style-src 'self' 'unsafe-inline'; 
+           img-src * data: blob:; 
+           media-src * data: blob:;">
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>SWIL</title>
 <style>
@@ -236,11 +242,12 @@ function startListening() {
       const postDiv = document.createElement('div');
       postDiv.classList.add("post");
 
-      if(p.text){
-        const text = document.createElement('p');
-        text.innerText = p.text;
-        postDiv.appendChild(text);
-      }
+     if (p.text) {
+  const text = document.createElement('p');
+  text.innerText = esc(p.text);   // ✅ safe
+  postDiv.appendChild(text);
+}
+
 
       if(p.img){
         const img = document.createElement('img');
@@ -296,9 +303,10 @@ function startListening() {
             header.innerText = 'Admin'; 
             cDiv.appendChild(header);
           }
-          const textNode = document.createElement('div'); 
-          textNode.innerText = esc(c.text || '');
-          cDiv.appendChild(textNode);
+         const textNode = document.createElement('div'); 
+textNode.innerText = esc(c.text || '');   // ✅ safe
+cDiv.appendChild(textNode);
+
           commentsDiv.appendChild(cDiv);
         });
       }, err => {
@@ -360,6 +368,7 @@ window.addEventListener('DOMContentLoaded', () => {
 </script>
 </body>
 </html>
+
 
 
 
