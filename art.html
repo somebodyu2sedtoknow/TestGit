@@ -57,5 +57,27 @@
       <a class="card" href="media.html">Media Review</a>
     </section>
   </main>
+  <!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+
+<script>
+  // --------- CONFIG (your project) ----------
+  const firebaseConfig = {
+    apiKey: "AIzaSyAzZWzC7n-XKAdlCLrGM3TPDl9Uo5rUKzY",
+    authDomain: "swil-eb81a.firebaseapp.com",
+    databaseURL: "https://swil-eb81a-default-rtdb.firebaseio.com",
+    projectId: "swil-eb81a",
+    storageBucket: "swil-eb81a.appspot.com",
+    messagingSenderId: "964324457027",
+    appId: "1:964324457027:web:9c1e7f6331a8c59b52f2f6",
+    measurementId: "G-TXP1TJTDD0"
+  };
+
+  // Initialize Firebase (only once)
+  if (!firebase.apps.length) {
+    firebase.initializeApp(firebaseConfig);
+  }
+</script>
 </body>
 </html>
