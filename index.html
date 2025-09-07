@@ -3,13 +3,15 @@
 <html lang="en">
 <head>
 <meta charset="utf-8"/>
- <meta http-equiv="Content-Security-Policy" 
-  content="default-src 'self' https://*.firebaseio.com https://*.gstatic.com https://*.googleapis.com https://www.gstatic.com https://firebasestorage.googleapis.com https://www.youtube.com https://i.pinimg.com https://media.tenor.com https://64.media.tumblr.com https://platform.vox.com https://images.squarespace-cdn.com data: blob:; 
-           script-src 'self' https://www.gstatic.com https://www.gstatic.com/firebasejs/ 'unsafe-inline'; 
-           style-src 'self' 'unsafe-inline'; 
-           img-src * data: blob:; 
-           media-src * data: blob:;">
+<meta http-equiv="Content-Security-Policy" 
+  content="default-src 'self' https://*.firebaseio.com https://*.gstatic.com https://*.googleapis.com https://www.gstatic.com https://firebasestorage.googleapis.com https://www.youtube.com https://i.pinimg.com https://media.tenor.com https://64.media.tumblr.com https://platform.vox.com https://images.squarespace-cdn.com data: blob:;
+           script-src 'self' https://www.gstatic.com https://www.gstatic.com/firebasejs/ 'unsafe-inline';
+           style-src 'self' 'unsafe-inline';
+           img-src * data: blob:;
+           media-src * data: blob:;
+           connect-src 'self' https://*.firebaseio.com https://*.googleapis.com wss://*.firebaseio.com;">
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
+
 <title>SWIL</title>
 <style>
   *{box-sizing:border-box;margin:0;padding:0}
@@ -368,6 +370,7 @@ window.addEventListener('DOMContentLoaded', () => {
 </script>
 </body>
 </html>
+
 
 
 
