@@ -1,0 +1,90 @@
+/* Basic layout and shared styles for SWIL pages */
+:root{
+  --accent:#cc0000;
+  --accent-dark:#990000;
+  --bg:#fdfdfd;
+  --text:#111;
+}
+
+*{box-sizing:border-box}
+body{
+  font-family: Arial, Helvetica, sans-serif;
+  margin:0;
+  background:var(--bg);
+  color:var(--text);
+}
+
+/* header */
+.site-header{
+  text-align:center;
+  padding:2rem 1rem 1rem;
+  background:#ffe6e6;
+  border-bottom:3px solid var(--accent);
+}
+.site-header h1{
+  margin:0;
+  font-size:3rem;
+  color:black;
+  -webkit-text-stroke:1.5px red;
+}
+.site-header h2{
+  margin:6px 0 0;
+  font-size:1.05rem;
+  color:#333;
+}
+
+/* nav */
+.main-nav{ background:var(--accent); }
+.main-nav ul{
+  list-style:none;
+  margin:0;
+  padding:0;
+  display:flex;
+  justify-content:center;
+  flex-wrap:wrap;
+}
+.main-nav > ul > li{ position:relative; }
+.main-nav a{
+  display:block;
+  padding:0.85rem 1.5rem;
+  color:white;
+  text-decoration:none;
+}
+.main-nav a:hover{ background:var(--accent-dark); }
+
+/* dropdown */
+.dropdown, .sub-dropdown{
+  display:none;
+  position:absolute;
+  top:100%;
+  left:0;
+  background:var(--accent);
+  min-width:220px;
+  flex-direction:column;
+  z-index:1000;
+}
+.main-nav li:hover > .dropdown{ display:flex; }
+.dropdown li{ position:relative; }
+.dropdown li:hover > .sub-dropdown{ display:flex; left:100%; top:0; }
+
+/* page content */
+.page-main{ padding:2rem; text-align:center; max-width:1000px; margin:0 auto; }
+.quick-links{ display:flex; gap:12px; justify-content:center; flex-wrap:wrap; margin-top:18px; }
+.card{
+  display:inline-block;
+  padding:14px 18px;
+  background:#fff;
+  border-radius:8px;
+  box-shadow:0 4px 10px rgba(0,0,0,0.06);
+  color:var(--text);
+  text-decoration:none;
+  min-width:180px;
+}
+
+/* responsive */
+@media (max-width:700px){
+  .main-nav ul{ flex-direction:column; align-items:center; }
+  .dropdown, .sub-dropdown{ position:static; display:none; width:100%; }
+  .main-nav li:hover > .dropdown{ display:none; }
+  .main-nav li:active > .dropdown{ display:flex; } /* for touch devices you can tap */
+}
