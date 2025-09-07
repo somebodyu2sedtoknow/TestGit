@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>SWIL - Blog</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="site-header">
+    <h1>SWIL</h1>
+    <h2>Sharing – What – I – Like</h2>
+  </header>
+
+  <nav class="main-nav">
+    <ul>
+      <li><a href="index.html">Home</a></li>
+      <li class="has-dropdown">
+        <a href="art.html">Art ▾</a>
+        <ul class="dropdown">
+          <li class="has-sub">
+            <a href="illustrations.html">Illustrations ▶</a>
+            <ul class="sub-dropdown">
+              <li><a href="ocs.html">OCs</a></li>
+              <li><a href="fanarts.html">Fanarts</a></li>
+            </ul>
+          </li>
+          <li class="has-sub">
+            <a href="writing.html">Writing ▶</a>
+            <ul class="sub-dropdown">
+              <li><a href="books.html">Books (📂)</a></li>
+              <li><a href="screenplays.html">Screenplays (📂)</a></li>
+            </ul>
+          </li>
+          <li><a href="music.html">Music</a></li>
+          <li><a href="media.html">Media Review</a></li>
+        </ul>
+      </li>
+      <li><a href="blog.html">Blog</a></li>
+      <li><a href="about.html">About Me</a></li>
+    </ul>
+  </nav>
+
+  <main class="page-main">
+    <h1>Blog</h1>
+    <p>Read my blog posts and updates here.</p>
+  </main>
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyAzZWzC7n-XKAdlCLrGM3TPDl9Uo5rUKzY",
+      authDomain: "swil-eb81a.firebaseapp.com",
+      databaseURL: "https://swil-eb81a-default-rtdb.firebaseio.com",
+      projectId: "swil-eb81a",
+      storageBucket: "swil-eb81a.appspot.com",
+      messagingSenderId: "964324457027",
+      appId: "1:964324457027:web:9c1e7f6331a8c59b52f2f6",
+      measurementId: "G-TXP1TJTDD0"
+    };
+    if (!firebase.apps.length) {
+      firebase.initializeApp(firebaseConfig);
+    }
+  </script>
+</body>
+</html>
